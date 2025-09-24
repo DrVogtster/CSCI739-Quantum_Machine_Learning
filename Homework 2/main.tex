@@ -1,0 +1,368 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{physics}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{siunitx}
+\usepackage{mathtools}
+\usepackage{braket}
+\usepackage{quantikz}
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usetikzlibrary{arrows.meta,calc}
+\usepackage{MnSymbol,wasysym}
+
+\title{CSCI-739 Quantum Machine Learning\\[2pt]
+\large Homework 2}
+\date{} % no date
+\setlist[itemize]{left=1.25em}
+\setlist[enumerate]{left=1.25em}
+\newcommand{\pts}[1]{\hfill{\small\bfseries(#1 pts)}}
+\newenvironment{summary}{\vspace{2pt}\noindent\textbf{Summary.}~}{\par\vspace{6pt}}
+
+\newcounter{problem}
+\newcommand{\problem}[2]{% #1 = title, #2 = points
+  \refstepcounter{problem}
+  \vspace{10pt}\noindent\textbf{Problem \theproblem.~#1} \pts{#2}\par
+}
+
+\newcounter{bonus}
+\newcommand{\bonus}[2]{% #1 = title, #2 = points
+  \refstepcounter{bonus}
+  \vspace{10pt}\noindent\textbf{Bonus \Alph{bonus}.~#1} \pts{#2}\par
+}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\textit{You got this, team. These problems are not random puzzles—they are a curated path through the pillars of QML. You will see how noise shapes computation (and is a headache) (P1), why fault-tolerance is the gatekeeper for real QML at scale (P2), how data actually gets \emph{into} a quantum computer (P3--P4), and how we can \emph{learn} circuits rather than hand-design them (P5). If you can reason through these, you are on the road from “quantum intrigued” to “quantum capable". I believe in you all! \smiley{}}
+\end{center}
+
+\vspace{1em}
+
+\noindent
+*uhum inspirational speech* \newline
+Quantum machine learning lives within quantum information sciences, which has a lot of puzzle pieces. The first four problem in this homework targets a puzzle piece we will need to understand for the future, with the fifth exposing you to how classical machine learning can benefit quantum computing research:
+\begin{itemize}
+  \item \emph{P1 (Noisy gates):} connects linear algebra to real devices—how small coherent errors compound across layers and change measurement statistics.
+  \item \emph{P2 (Logical error rates):} ties a subset of quantum mahcine learning algoirhtms we will eventually discuss( quantum support vector machines (QSVMs), quantum boltzmann machines (QBMs), Quantum Neural Networks (QNNs), and Variational Quantum Algorithms (VQAs)) to the economics of fault tolerance—what distances and qubit counts make QML feasible.
+  \item \emph{P3--P4 (Encoding \& state preparation):} shows how precision and resources trade off when mapping continuous values (like $\pi$ or $e$) to finite qubits and finite-depth circuits—core to quantum feature maps.
+  \item \emph{P5 (Bell States \& using Reinforcement Learning to Construct Them):} blends first-principles circuit synthesis with reinforcement learning to automate discovery under hardware-aware constraints.
+\end{itemize}
+Use lectures, notes, and eachother to conqueure this homework, team! \smiley{}
+
+\vspace{1em}
+
+% ---------------- Homework Summary ----------------
+\section*{Homework Summary}
+This homework contains five standard problems and two bonus problems (25 points each). For this homework you can either choose to pick 4 standard problems worth 25 points each or 5 standard problems worth 20 points each. They build a coherent arc from noisy primitives to scalable QML.
+
+\begin{enumerate}
+  \item \textbf{Noisy Hadamard Gates and Their Implications:} Unitarity proofs; repeated $H$ action; a coherent-error model $U(\varepsilon)=H e^{i\varepsilon\sigma_z}$; measurement consequences with/without noise.
+  \item \textbf{Logical Error Rates for QML Applications:} Surface-code scaling for QSVMs, QBMs, QNNs, VQAs; compute $d$, $N_q$; orders-of-magnitude gap vs.\ current hardware; interpret feasibility.
+  \item \textbf{Encoding \(\pi\):} Basis, amplitude, and angle encodings; precision vs.\ resources; optional BBP hex-digit extractor for $\pi$.
+  \item \textbf{Encoding \(e\):} Three encodings again, now with factorial-tail bounds to pick truncation for $n$ correct digits; compare robustness and cost.
+  \item \textbf{Bell + RL Synthesis:} Construct minimal-depth Bell circuits from $\ket{00}$, define an RL objective with depth penalties, and compare learned vs.\ hand-derived circuits.
+  \item[\textbf{Bonus A.}] \textbf{Lindblad, Two Analytic Cases:} Solve the master equation for $\gamma=0$ and $\gamma=1$; long-time measurement probabilities.
+  \item[\textbf{Bonus B.}] \textbf{Qiskit State Prep of \(\pi\):} Implement and verify the three encodings on a simulator for $n=1,2,3$ decimal places.
+\end{enumerate}
+
+% ---------------- Problem 1 ----------------
+\problem{Noisy Hadamard Gates and Their Implications}{20}
+\begin{summary}
+Analyze how a coherent $Z$-axis over-rotation modifies Hadamard behavior and measurement outcomes. This links linear-algebra fundamentals to realistic gate implementations.
+\end{summary}
+
+Consider
+\[
+U(\varepsilon) \;=\; H\,e^{i\varepsilon\sigma_z}
+\;=\; \frac{1}{\sqrt{2}}
+\begin{pmatrix}
+e^{i\varepsilon} & e^{-i\varepsilon}\\[4pt]
+e^{i\varepsilon} & -\,e^{-i\varepsilon}
+\end{pmatrix},
+\]
+where $\varepsilon\in\mathbb{R}$ is an error parameter, $\sigma_z=\begin{psmallmatrix}1&0\\0&-1\end{psmallmatrix}$, and $H=\tfrac{1}{\sqrt{2}}\!\begin{psmallmatrix}1&1\\[1pt]1&-1\end{psmallmatrix}$.
+
+\begin{enumerate}[label=(\alph*)]
+  \item Show that $H$ is unitary.
+  \item Prove that for any unitary $U$, $U^{-1}=U^\dagger$ (conjugate transpose).
+  \item Starting from $\ket{0}$, determine $H^n\ket{0}$ as a function of $n$; distinguish even vs.\ odd $n$.
+  \item Show that $U(0)=H$.
+  \item Apply $U(\varepsilon)$ repeatedly $n$ times to $\ket{0}$. Derive the resulting state in terms of $n$ and $\varepsilon$.
+  \item Compare the probabilities of measuring $\ket{0}$ and $\ket{1}$ for (i) $\varepsilon=0$ vs.\ (ii) $\varepsilon\neq 0$. Discuss how coherent error accumulates with depth.
+\end{enumerate}
+
+% ---------------- Problem 2 ----------------
+\problem{Logical Error Rates for Quantum Machine Learning Applications}{20}
+\begin{summary}
+Connect QML application targets to surface-code scaling. Compute the code distance $d$ and qubit overhead $N_q$ needed to reach application-level logical error rates, then compare to today's hardware scale ($10^2$--$10^3$ physical qubits).
+\end{summary}
+
+Parameters: code distance $d$ (corrects $\lfloor(d-1)/2\rfloor$ errors), physical error $p$, threshold $p_{\mathrm{th}}$, logical error $p_L$, qubit count $N_q$. Models:
+\[
+N_q \approx c\,d^2,\qquad
+p_L \approx A\!\left(\frac{p}{p_{\mathrm{th}}}\right)^{\tfrac{d+1}{2}}\!,
+\]
+with constants $A,c>0$.
+
+\textbf{Application targets (context).}
+\begin{itemize}
+  \item \textbf{Kernel methods/QSVMs ($p_L\le 10^{-9}$):} quantum feature maps embed data into high-dimensional Hilbert spaces; repeated kernel evaluations demand consistent outputs under noise.
+  \item \textbf{Quantum Boltzmann Machines ($p_L\le 10^{-10}$):} generative modeling via quantum superposition; training requires many samples/energy evaluations, making error accumulation critical.
+  \item \textbf{Quantum Neural Networks ($p_L\le 10^{-11}$):} deeper parameterized circuits for structured data; cumulative gate error makes strict $p_L$ essential.
+  \item \textbf{Variational Quantum Algorithms ($p_L\le 10^{-12}$):} hybrid optimization highly sensitive to expectation-value corruption; demands the lowest $p_L$ here.
+\end{itemize}
+
+\begin{enumerate}[label=(\alph*)]
+  \item Analyze $p_L$ as $d\to\infty$ for $p>p_{\mathrm{th}}$ vs.\ $p<p_{\mathrm{th}}$. Can $p_L$ be made arbitrarily small?
+  \item For each application and each parameter pair
+  \[
+  p\in\{10^{-3},10^{-4}\},\qquad p_{\mathrm{th}}\in\{10^{-2},10^{-3}\},
+  \]
+  with $A=1$ and $c=2$, estimate:
+  \begin{itemize}
+    \item the minimum $d$ required,
+    \item $N_q\approx 2d^2$,
+    \item and the number of correctable errors $\lfloor(d-1)/2\rfloor$.
+  \end{itemize}
+  \item Compare each $N_q$ to $100$--$1000$ qubits. How many orders of magnitude larger is your estimate? Comment on near-term vs.\ long-term feasibility.
+  \item Reflect: Which application is likely to reach fault-tolerant feasibility first, and why? Justify using your $d$, $N_q$, and target $p_L$.
+\end{enumerate}
+
+% ---------------- Problem 3 ----------------
+\problem{Quantum Data Encoding and State Preparation: Encoding \(\pi\) (integer + \(n\) decimals)}{20}
+\begin{summary}
+Encode the constant \(\pi\) using basis, amplitude, and angle encodings that include \emph{both} the significant (integer) digit and the first \(n\) decimal digits. This forces you to reason about how full fixed-precision numbers are represented on quantum hardware and how resource costs scale with precision.
+\end{summary}
+
+Let \(\pi = 3.14159\ldots\). Write
+\[
+\hat{\pi}^{(n)} \;=\; S_\pi \;+\; \sum_{i=1}^{n}\frac{d_i}{10^i},
+\qquad S_\pi=3,\quad d_i\in\{0,1,\dots,9\}.
+\]
+(Thus the digit list is \([S_\pi, d_1, d_2, \dots, d_n]\) with \(n{+}1\) total digits.)
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{Basis encoding (include integer + \(n\) decimals).}
+  Use \emph{binary-coded decimal (BCD)} to preserve the decimal digit structure. Map each digit \(u\in\{0,\dots,9\}\) to its 4-bit BCD block \(\mathrm{BCD}(u)\in\{0,1\}^4\). Define the \((4(n{+}1))\)-qubit basis state
+  \[
+  \ket{\psi_{\mathrm{basis}}^{(n)}} \;=\; \ket{\mathrm{BCD}(S_\pi)}\;\otimes\; \bigotimes_{i=1}^{n}\ket{\mathrm{BCD}(d_i)}.
+  \]
+  \emph{Example (for \(n=2\)):} \([3,1,4]\mapsto \ket{0011}\otimes\ket{0001}\otimes\ket{0100} = \ket{0011\,0001\,0100}\).
+  State the qubit count \(4(n{+}1)\) and depth needed (just \(X\)-initializations).  
+  \emph{Alternative (optional):} a two-register binary scheme with an \(I\)-qubit integer register for \(S_\pi\) (here \(I=2\)) and a \(k(n)=\lceil n\log_2 10\rceil\)-qubit fractional register holding the first \(k(n)\) \emph{binary} fractional bits of \(\pi\). Do the basis encoding for $n=3$
+
+  \item \textbf{Amplitude encoding (digits-as-amplitudes, including the integer digit).}
+  Form a length-\(m=n{+}1\) vector by scaling each decimal digit to \([0,1]\):
+  \[
+  x_0=\frac{S_\pi}{9},\qquad x_i=\frac{d_i}{9}\ (i=1,\dots,n),\qquad 
+  \tilde x=\frac{x}{\|x\|_2}.
+  \]
+  Encode on \(q=\lceil\log_2 m\rceil\) qubits:
+  \[
+  \ket{\psi_{\mathrm{amp}}^{(n)}} \;=\; \sum_{j=0}^{m-1}\tilde x_{j}\,\ket{j}\quad(\text{pad with zeros if }2^q>m).
+  \]
+  Work out \(\tilde x\) explicitly for \(n=3\) using the digits of \(\pi\) (i.e., \([3,1,4,1]\)) and report \(q\).
+
+  \item \textbf{Angle encoding (single- and multi-qubit) for the full truncated value.}
+  Let the full truncated value be \(v^{(n)}=\hat{\pi}^{(n)}\).  
+  \emph{Single-qubit full-value encoding:} choose any scale \(C_\pi>v^{(n)}\) (e.g., \(C_\pi=4\)) and set
+  \[
+  \theta_n \;=\; 2\arcsin\!\Big(\frac{v^{(n)}}{C_\pi}\Big),\qquad
+  \ket{\psi_\theta^{(n)}} \;=\; R_y(\theta_n)\ket{0}
+  = \begin{bmatrix}\sqrt{1-(v^{(n)}/C_\pi)^2}\\[2pt] v^{(n)}/C_\pi\end{bmatrix}.
+  \]
+  \emph{Multi-qubit per-digit variant:} allocate \(n{+}1\) qubits, one per digit, with angles
+  \(\theta_0=\alpha\,S_\pi/9\) and \(\theta_i=\alpha\,d_i/9\) for \(i=1,\dots,n\), preparing
+  \(\bigotimes_{i=0}^{n} R_y(\theta_i)\ket{0}^{\otimes(n+1)}\).
+  Comment on choosing $\alpha$. Discuss how \(\alpha\) trades dynamic range vs.\ noise sensitivity. Do it for $n=3$
+
+  \item \textbf{Scaling and reflection.}
+  Give qubit counts and a preparation-depth estimate for each scheme as a function of \(n\). Comment on (i) robustness to small digit errors, (ii) which encoding is most efficient for large \(n\).
+\end{enumerate}
+
+\noindent\textbf{Optional tool (unchanged):} You may still use the BBP formula to extract \emph{hex} digits of \(\pi\) if you opt for the binary two-register alternative for the fractional part.
+
+
+% ---------------- Problem 4 ----------------
+\problem{Quantum Data Encoding and State Preparation: Encoding \(e\) to \(n\) digits (integer + \(n\) decimals)}{20}
+\begin{summary}
+Repeat the three encodings for \(e\), now explicitly including the significant (integer) digit and the first \(n\) decimals. Use series-tail bounds to choose truncations guaranteeing \(n\) correct decimal places, and compare robustness and cost.
+\end{summary}
+
+Let \(e=2.71828\ldots\). Write
+\[
+\hat e^{(n)} \;=\; S_e \;+\; \sum_{i=1}^{n}\frac{d_i}{10^i},
+\qquad S_e=2,\quad d_i\in\{0,\dots,9\}.
+\]
+(Thus the digit list is \([S_e, d_1, d_2, \dots, d_n]\).)
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{Basis encoding (include integer + \(n\) decimals).}
+  Use BCD on each decimal digit to preserve decimal structure:
+  \[
+  \ket{\psi_{\mathrm{basis}}^{(n)}} \;=\; \ket{\mathrm{BCD}(S_e)}\;\otimes\; \bigotimes_{i=1}^{n}\ket{\mathrm{BCD}(d_i)}\.
+  \]
+  \emph{Example (for \(n=2\)):} \([2,7,1]\mapsto \ket{0010\,0111\,0001}\).
+  State the qubit count \(4(n{+}1)\) and the initialization pattern.  
+  \emph{Alternative (optional):} two-register binary scheme with \(I=2\) integer qubits for \(S_e\) and \(k(n)=\lceil n\log_2 10\rceil\) fractional binary bits. Do it for $n=3$.
+
+  \item \textbf{Amplitude encoding (digits-as-amplitudes, including the integer digit).}
+  Define \(m=n{+}1\) and
+  \[
+  x_0=\frac{S_e}{9},\qquad x_i=\frac{d_i}{9}\ (i=1,\dots,n),\qquad 
+  \tilde x=\frac{x}{\|x\|_2}.
+  \]
+  Encode on \(q=\lceil\log_2 m\rceil\) qubits:
+  \[
+  \ket{\psi_{\mathrm{amp}}^{(n)}} \;=\; \sum_{j=0}^{m-1}\tilde x_j\,\ket{j}\quad(\text{zero-pad to }2^q\text{ if needed}).
+  \]
+  Work out \(\tilde x\) explicitly for \(n=3\) using the digits \([2,7,1,8]\) and report \(q\).
+
+  \item \textbf{Angle encoding (single- and multi-qubit) for the full truncated value.}
+  Let \(v^{(n)}=\hat e^{(n)}\).  
+  \emph{Single-qubit full-value encoding:} choose any scale \(C_e>v^{(n)}\) (e.g., \(C_e=3\)) and set
+  \[
+  \theta_n \;=\; 2\arcsin\!\Big(\frac{v^{(n)}}{C_e}\Big),\qquad
+  \ket{\psi_\theta^{(n)}} \;=\; R_y(\theta_n)\ket{0}
+  = \begin{bmatrix}\sqrt{1-(v^{(n)}/C_e)^2}\\[2pt] v^{(n)}/C_e\end{bmatrix}.
+  \]
+  \emph{Multi-qubit per-digit variant:} \(n{+}1\) qubits with \(\theta_0=\alpha\,S_e/9\) and \(\theta_i=\alpha\,d_i/9\) for \(i=1,\dots,n\), preparing \(\bigotimes_{i=0}^{n} R_y(\theta_i)\ket{0}^{\otimes(n+1)}\). Comment on choosing \(\alpha\).
+
+  \item \textbf{Precision vs.\ resources (updated to full-value digits).}
+  Using \(e=\sum_{k=0}^{\infty}\frac{1}{k!}\) and the bound \(0<e-\sum_{k=0}^{m}\frac{1}{k!}<\frac{1}{m\,m!}\):
+  \begin{itemize}
+    \item pick \(m\) to guarantee \(n\) correct decimal digits for the \emph{full} value \(\hat e^{(n)}\) (so that all \(d_1,\dots,d_n\) are correct),
+    \item give qubit counts and preparation-depth estimates for each encoding as a function of \(n\),
+    \item discuss robustness when one or more trailing digits are incorrect (impact on each encoding).
+  \end{itemize}
+\end{enumerate}
+
+
+% ---------------- Problem 5 ----------------
+\problem{Bell States and Reinforcement Learning for Minimal-Depth Synthesis}{20}
+\begin{summary}
+Construct minimal-depth circuits that prepare each Bell state from $\ket{00}$, then set up an RL objective that discovers such circuits under a depth penalty. Compare learned circuits to your hand designs. Consider the four Bell States:
+\end{summary}
+
+\textbf{Targets (Bell states):}
+\[
+\ket{\Phi^\pm}=\tfrac{1}{\sqrt{2}}(\ket{00}\pm\ket{11}),\qquad
+\ket{\Psi^\pm}=\tfrac{1}{\sqrt{2}}(\ket{01}\pm\ket{10}).
+\]
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{Synthesis from $\ket{00}$} Using only either all or some subset of gates in $\{X,Y,Z,H,\mathrm{CNOT}\}$, propose a circuit for each Bell state, prove correctness, report depth and CNOT count, and argue minimality (or provide a lower-bound justification e.g. if you found a solution with depth 3, then atleast you know the potential smallest circuit depth is 3, but it could be lower potentially).
+  \item \textbf{RL environment.} Define an MDP: state representation, action set \newline $\{X_0,X_1,Y_0,Y_1,Z_0,Z_1,H_0,H_1,\mathrm{CNOT}_{0\to1},\mathrm{CNOT}_{1\to0}\}$, transition, termination.
+  \item \textbf{Objective with depth penalty.} For target $\ket{\phi}$, use fidelity $F=|\braket{\phi|\psi}|^2$ and terminal reward
+  \(
+  R(\tau)=F_T-\lambda L-\kappa C
+  \)
+  (depth $L$, CNOT count $C$). Optimize $J(\theta)=R(\theta)$. You may add shaping if you are a reinforcement learning wizard: $r_t=F_t-F_{t-1}-\eta$, but it is not required \smiley{}.
+  \item \textbf{Tooling (suggested).} \texttt{qiskit}, \texttt{qiskit-aer} for simulation/fidelity; \texttt{gymnasium} + \texttt{stable-baselines3} or \texttt{RLlib} for RL.
+  \item \textbf{Hand vs.\ RL comparison.} For each Bell state, report your hand circuit and the best RL circuit (gate list, $L$, $C$, $F_T$). Compare depth/CNOTs, structural equivalence (up to local Cliffords/commutations/global phase), sensitivity to $(\lambda,\kappa)$.
+\end{enumerate}
+
+% ---------------- Bonus A ----------------
+\bonus{Lindblad Master Equation: Two Analytic Cases}{25}
+\textbf{Summary:} The Lindblad master equation describes open quantum systems and their interactions with the environment. The mathematical objects involved are:
+\begin{itemize}
+    \item $\rho$ - The density matrix representing the quantum state (qubit) for a 2 level system, given by:
+    \begin{equation*}
+        \rho(t) = \begin{bmatrix} \rho_{00}(t) & \rho_{01}(t) \\ \rho_{10}(t) & \rho_{11}(t) \end{bmatrix},
+    \end{equation*}
+    where $\rho_{00}$ and $\rho_{11}$ represent the probabilities of measuring the system in the $|0\rangle$ and $|1\rangle$ states, respectively, and $\rho_{01}$ and $\rho_{10}$ represent coherence terms. In general this matrix is a $N \times N$ for a $N$ level system
+    \item $\gamma$ - The decay rate associated with spontaneous emission.
+    \item $\sigma_-$ and $\sigma_+$ - The lowering and raising operators, respectively, defined as:
+    \begin{align*}
+        \sigma_- &= \begin{bmatrix} 0 & 1 \\ 0 & 0 \end{bmatrix}, \quad
+        \sigma_+ = \begin{bmatrix} 0 & 0 \\ 1 & 0 \end{bmatrix}.
+    \end{align*}
+    \item $\sigma_z$ - The Pauli-Z matrix:
+    \begin{equation*}
+        \sigma_z = \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix}.
+    \end{equation*}
+    \item $[A, B] = AB - BA$ - The commutator.
+    \item $\{A, B\} = AB + BA$ - The anti-commutator.
+    \item for a $N$ level system $\rho_{jj}$ is the probability at measurement you are in state $\ket{j}$.
+\end{itemize}
+
+\textbf{Initial Condition for an Uncertain State:} If the system is initially in an uncertain state, where it is in $|0\rangle$ with probability $p_0$ and in $|1\rangle$ with probability $p_1$ (such that $p_0 + p_1 = 1$), the initial density matrix is given by:
+\begin{equation*}
+    \rho(0) = p_0 |0\rangle \langle 0| + p_1 |1\rangle \langle 1| = \begin{bmatrix} p_0 & 0 \\ 0 & p_1 \end{bmatrix},
+\end{equation*}
+where $\ket{i}\bra{i}$ is an outer product. The \textbf{outer product} of a quantum state \( |\psi\rangle \) with itself, denoted as \( |\psi\rangle \langle \psi| \), is computed as follows:
+
+1. Given a quantum state in column vector form:
+   \[
+   |\psi\rangle = \begin{bmatrix} a_1 \\ a_2 \\ \vdots \\ a_n \end{bmatrix}
+   \]
+   
+2. Compute its conjugate transpose (bra):
+   \[
+   \langle \psi| = \begin{bmatrix} a_1^* & a_2^* & \cdots & a_n^* \end{bmatrix}
+   \]
+
+3. The outer product is given by:
+   \[
+   |\psi\rangle \langle \psi| =
+   \begin{bmatrix} a_1 \\ a_2 \\ \vdots \\ a_n \end{bmatrix}
+   \begin{bmatrix} a_1^* & a_2^* & \cdots & a_n^* \end{bmatrix}
+   \]
+
+   resulting in an \( n \times n \) Hermitian matrix:
+   \[
+   |\psi\rangle \langle \psi| =
+   \begin{bmatrix}
+   a_1 a_1^* & a_1 a_2^* & \cdots & a_1 a_n^* \\
+   a_2 a_1^* & a_2 a_2^* & \cdots & a_2 a_n^* \\
+   \vdots & \vdots & \ddots & \vdots \\
+   a_n a_1^* & a_n a_2^* & \cdots & a_n a_n^*
+   \end{bmatrix}
+   \]
+
+\textbf{Properties for the math nerds who are interested and want to do some further research:}
+\begin{itemize}
+    \item \( |\psi\rangle \langle \psi| \) is a \textbf{projection operator}.
+    \item It is \textbf{Hermitian}: \( (|\psi\rangle \langle \psi|)^\dagger = |\psi\rangle \langle \psi| \).
+    \item If \( |\psi\rangle \) is normalized, \( |\psi\rangle \langle \psi| \) represents a \textbf{pure state density matrix}.
+
+\end{itemize}
+
+For example, if there is uncertainty in the initial quantum state (or superposition) the quantum system is in e.g. $|0\rangle$ 50\% of the time and in $|1\rangle$ 50\% of the time, then:
+\begin{equation*}
+    \rho(0) = \frac{1}{2} \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 0.5 & 0 \\ 0 & 0.5 \end{bmatrix}.
+\end{equation*}
+This represents a completely mixed state, indicating maximal uncertainty in the initial preparation.
+
+Solve analytically the Lindblad equation for a single qubit in two cases:
+\begin{equation}
+    \frac{d\rho}{dt} = -i[H, \rho] + \gamma (\sigma_- \rho \sigma_+ - \frac{1}{2}\{\sigma_+ \sigma_-, \rho\})
+\end{equation}
+where $H = \frac{1}{2} \sigma_z$,
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{Case $\gamma=0$:} Solve for $\rho(t)$, verify $\rho_{00}(t)+\rho_{11}(t)=1$, and find $\lim_{t\to\infty}\rho_{00}(t)$ and $\rho_{11}(t)$. Explain physically.
+  \item \textbf{Case $\gamma=1$:} Solve the coupled ODEs for $\rho(t)$, verify $\rho_{00}(t)+\rho_{11}(t)=1$, and compute the $t\to\infty$ limits of $P_0(t)=\rho_{00}(t)$ and $P_1(t)=\rho_{11}(t)$ with interpretation. 
+\end{enumerate}
+
+% ---------------- Bonus B ----------------
+\bonus{State Preparation of \(\pi\) to \(n\) Digits in Qiskit}{25}
+\begin{summary}
+Implement and verify basis, amplitude, and angle encodings of $\pi$ on a simulator for $n=1,2,3$ decimal places. Confirm that the prepared state matches the analytic target with high fidelity. Hint: For this homework, I have selected the qubit order to match the binary representation, but during readout, the output will be inverted in the register. Therefore, simply reverse the register's output to realign it with the binary representation, if needed, based on how you do it \smiley{}.
+\end{summary}
+
+Conventions: $\hat\pi^{(n)}$ is $\pi$ truncated to $n$ decimals; $f^{(n)}=\hat\pi^{(n)}-3$.
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{Basis:} $k(n)=\lceil n\log_2 10\rceil$ binary digits $\Rightarrow$ target $\ket{b_1\cdots b_{k(n)}}$. Prepare with $X$ gates and verify via statevector fidelity (see mycourses example program under lecture 4 in content tab).
+  \item \textbf{Amplitude:} digits $d_1\ldots d_n\mapsto x_i=d_i/9$, normalize, encode on $q=\lceil\log_2 n\rceil$ qubits (pad if needed). Verify fidelity.
+  \item \textbf{Angle:} one-qubit state $R_y(\theta_n)\ket{0}$ with $\theta_n=2\arcsin f^{(n)}$. Verify against analytic amplitudes.
+  \item \textbf{Report:} qubit counts, circuit depth, and a table of fidelities for all $3\times 3$ cases. Briefly compare resource/accuracy trade-offs across encodings.
+\end{enumerate}
+
+\end{document}
