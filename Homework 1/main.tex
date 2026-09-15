@@ -40,7 +40,7 @@
 \maketitle
 
 \begin{center}
-\textit{You got this team. My homeworks are meant to to help you get on the path to become a quantum nerd like me. Well, that is if you would like to be one someday \smiley{}. Remember if Ryan Vogt can do quantum computing, that means anyone can! }
+\textit{You got this team. My homeworks are meant to help you get on the path to become a quantum nerd like me. Well, that is if you would like to be one someday \smiley{}. Remember if Ryan Vogt can do quantum computing, that means anyone can! }
 \end{center}
 
 \vspace{1em}
@@ -57,8 +57,15 @@ Go research, use the lecture notes, videos, and the internet. The world is your 
 \vspace{1em}
 
 % ---------------- Homework Summary ----------------
+\section*{Logistics}
+\begin{itemize}
+  \item \textbf{Due:} \texttt{TODO -- date/time}.
+  \item \textbf{Submit:} a single PDF with your written solutions \emph{and} your Qiskit notebook (\texttt{.ipynb}) for Problems 4, 5, and Bonus B. Include the measurement histograms (or printed counts) in the PDF.
+  \item \textbf{Collaboration:} you may discuss ideas with classmates, but everything you submit must be written and coded by you. If you use AI tools, say where and how.
+\end{itemize}
+
 \section*{Homework Summary}
-This homework contains five standard problems (20 points each) and two bonus problems (25 points each). Together they guide you through the basics of quantum computing, which are the building blocks to facilitate QML.
+This homework contains five standard problems (100 points total, weighted by effort) and two bonus problems (15 points each). Together they guide you through the basics of quantum computing, which are the building blocks to facilitate QML.
 
 \begin{enumerate}
   \item \textbf{Qubit Basics:} Probabilities, normalization, and measurement with Dirac notation.
@@ -71,7 +78,7 @@ This homework contains five standard problems (20 points each) and two bonus pro
 \end{enumerate}
 
 % ---------------- Problem 1 ----------------
-\problem{Qubit Basics}{20}
+\problem{Qubit Basics}{10}
 \begin{summary}
 This problem introduces the fundamental concept of a single qubit state and how measurement is related to its amplitudes. You will calculate probabilities using Dirac notation and confirm normalization for a specific example.
 \end{summary}
@@ -92,7 +99,7 @@ Consider a general single-qubit quantum state:
 \end{enumerate}
 
 % ---------------- Problem 2 ----------------
-\problem{Two-Qubit Systems and CNOT}{20}
+\problem{Two-Qubit Systems and CNOT}{15}
 \begin{summary}
 This problem extends your understanding from single qubits to two-qubit systems. You will define the computational basis states using tensor products, analyze how quantum gates act on these states, and explore the structure of the CNOT operation.
 \end{summary}
@@ -152,14 +159,14 @@ This problem develops your understanding of the Bloch sphere representation of a
   \small Bloch sphere representation of a qubit.
   \end{center}
 
-  \item For each quantum gate $X,Y,Z,H,P(\hat{\theta})$ ($\hat{\theta}\in[0,2\pi)$ - this is sometimes refered to as the phase gate), describe qualitatively how each transforms $(\alpha,\beta)$, $(\theta,\phi)$, and their impact on measurement of the basis states after their application relative to the measurements of the original quantum state.
+  \item For each quantum gate $X,Y,Z,H,P(\hat{\theta})$ ($\hat{\theta}\in[0,2\pi)$ - this is sometimes referred to as the phase gate), describe qualitatively how each transforms $(\alpha,\beta)$, $(\theta,\phi)$, and their impact on measurement of the basis states after their application relative to the measurements of the original quantum state.
   \item Apply $H$ to $\ket{0}$, write the resulting state.
   \item Apply $H$ again, describe which basis state undergoes constructive/destructive interference and explain the outcome.
   \item Is the final state a superposition or a determined basis state? Justify.
 \end{enumerate}
 
 % ---------------- Problem 4 ----------------
-\problem{From Tensor Products to Circuits in Qiskit}{20}
+\problem{From Tensor Products to Circuits in Qiskit}{25}
 \begin{summary}
 This problem connects the mathematical definition of multi-qubit operations using tensor products to their implementation in Qiskit. You will practice reasoning about superposition states mathematically and then reproduce them in circuit form.
 \end{summary}
@@ -168,45 +175,49 @@ This problem connects the mathematical definition of multi-qubit operations usin
   \item Prove that $(H\otimes H)\ket{00} = (H\ket{0})\otimes(H\ket{0})$. Explain why this generalizes to $n$ qubits.
   \item Explain how tensoring unitaries allows us to define operations on multi-qubit systems.
   \item Construct a Qiskit circuit on two qubits applying $H$ to both, and verify it matches your result in (a).
-  \item On three qubits: Case 1—apply $H$ to all, then CNOT(0$\to$1) \newline (with convention being $\text{control qubit number} \to \text{ target qubit number)}$ starting qubit indexing at 0 because we count our qubits like real computer scientists. Case 2—apply $H$ to all, then CNOT(1$\to$0).  
-  In both cases, show mathematically (tensor product or simulation) how you can do an analgous computation to what was done in (a) for more general multi qubit systems. Hint: If nothing is done to a qubit at a "step" of the quantum circuit, use the identity matrix as the quantum operation on it ("the do nothing gate"). See the circuits below to get an idea of each case - following Case 1 and then Case 2.
+  \item On three qubits: Case 1—apply $H$ to $q_0$ only, then CNOT(0$\to$1) \newline (with convention being $\text{control qubit number} \to \text{ target qubit number)}$ starting qubit indexing at 0 because we count our qubits like real computer scientists. Case 2—apply $H$ to $q_0$ only, then CNOT(1$\to$0).  
+  In both cases, show mathematically (tensor product or simulation) how you can do an analogous computation to what was done in (a) for more general multi qubit systems. Hint: If nothing is done to a qubit at a "step" of the quantum circuit, use the identity matrix as the quantum operation on it ("the do nothing gate"). See the circuits below to get an idea of each case - following Case 1 and then Case 2 (the figures show $H$ on every qubit; you should apply $H$ only to $q_0$).
+  \item \textit{Food for thought:} if you instead apply $H$ to \emph{all} three qubits before the CNOT (as in the figures), show that Case 1 and Case 2 produce exactly the same state. Why does the CNOT direction not matter here? (Hint: what is CNOT$\ket{++}$? Is $\ket{+++}$ entangled?)
   \includegraphics[]{qc_case1.pdf}
   \includegraphics[]{qc_case2.pdf}
 \end{enumerate}
 
 % ---------------- Problem 5 ----------------
-\problem{Half and Full Quantum Adder: Implementation and Interpretation}{20}
+\problem{Half and Full Quantum Adder: Implementation and Interpretation}{30}
 \begin{summary}
-In this problem you will connect provided circuit diagrams for a 1-bit half adder and full adder (with carry) to its behavior (see Figure 1 and 2). You will implement the circuits (which is made of of CNOT, Toffoli (Controlled CNOT), reason about one input by hand, and then validate all input cases on a simulator. Measure S the sum and C the carry for given inputs. A half adder is an add that only calculates the sum and the carry for a stand alone add - not additions that can be strung together. However, a full adder can do chain addition to do "ripple-carry adders".
+In this problem you will connect provided circuit diagrams for a 1-bit half adder and full adder (with carry) to its behavior (see Figures~\ref{fig:halfadder} and~\ref{fig:fulladder}). You will implement the circuits (which are made of CNOT and Toffoli gates), reason about one input by hand, and then validate all input cases on a simulator. Measure S the sum and C the carry for given inputs. A half adder is an adder that only calculates the sum and the carry for a stand alone add - not additions that can be strung together. However, a full adder can do chain addition to do "ripple-carry adders".
+
+\textit{The Toffoli (CCX) gate was not covered in lecture:} it is a three-qubit gate with two controls and one target that flips the target if and only if both controls are $\ket{1}$, i.e. $\ket{a,b,c}\mapsto\ket{a,b,c\oplus ab}$. In the computational basis its $8\times 8$ matrix is the identity except that the last two basis states $\ket{110}$ and $\ket{111}$ are swapped. In Qiskit it is \texttt{qc.ccx(control1, control2, target)}.
+\end{summary}
 \begin{figure}[h!]
   \centering
   \includegraphics[width=\textwidth]{halfadder.png}
-  \caption{Half Quantum Adder (without ripple(chain)-carry)}
-  \label{fig:your_label1}
+  \caption{Half Quantum Adder (without ripple(chain)-carry). Wires top to bottom are $q_0=A$, $q_1=B$, $q_2=\ket{0}$; outputs $S$ on $q_1$ and $C$ on $q_2$.}
+  \label{fig:halfadder}
 \end{figure}
 
 \begin{figure}[h!]
   \centering
   \includegraphics[width=\textwidth]{fulladder.png}
-  \caption{Full Quantum Adder (with ripple(chain)-carry)}
-  \label{fig:your_label1}
+  \caption{Full Quantum Adder (with ripple(chain)-carry). Wires top to bottom are $q_0=A$, $q_1=B$, $q_2=C_{in}$, $q_3=\ket{0}$; outputs $S$ on $q_2$ and $C_{out}$ on $q_3$.}
+  \label{fig:fulladder}
 \end{figure}
 
 \begin{enumerate}[label=(\alph*)]
 
-  \item Work out by hand what happens to $\ket{110}$ as input to the half quantum adder and $\ket{1100}$ for the full adder. What is the final expect quantum state before measurement.
-  \item Implement both of the circuits circuit in Qiskit, initializing carry to $\ket{0}$ and setting inputs with $X$ gates as needed.
-  \item Run for inputs $(q_0,q_1)\in\{00,01,10,11\}$ for the half adder. Do the same with the full adder, with $C=q3=0$. Use conditional $X$ gates to prepare inputs that start in the ground state on the appropiate qubit. Record outputs $(q_1,q_2)$ which represent the value of the addition and if carry is present, respectively for the half adder, and measure $(q_3,q_4)$ for the full adder.
+  \item Work out by hand what happens to $\ket{110}$ as input to the half quantum adder and $\ket{1100}$ for the full adder. What is the final expected quantum state before measurement?
+  \item Implement both circuits in Qiskit, initializing carry to $\ket{0}$ and setting inputs with $X$ gates as needed.
+  \item Run for inputs $(q_0,q_1)\in\{00,01,10,11\}$ for the half adder. Do the same with the full adder, with $C_{in}=q_2=0$. Use conditional $X$ gates to prepare inputs that start in the ground state on the appropriate qubit. Record outputs $(q_1,q_2)$ which represent the value of the addition and if carry is present, respectively for the half adder, and measure $(q_2,q_3)$ for the full adder, which hold $S$ and $C_{out}$ respectively.
   \item Compare the quantum adder results using a simulator did you find what you expected? You are in no way required to, but feel free to run this same circuit on Qiskits real quantum computers instead of simulator - did your results change?
 \end{enumerate}
 
-\textbf{Important note:} You may optionally run your ripple-carry adder on IBM’s real quantum hardware (e.g., 100 shots) to compare expectation vs. reality. Running on real hardware requires a Qiskit account (with credit card setup) and is \emph{not required}. You will not be penalized for not doing this.  
+\textbf{Important note:} You may optionally run your ripple-carry adder on IBM’s real quantum hardware (e.g., 100 shots) to compare expectation vs. reality. Running on real hardware requires an IBM Quantum account (the free Open Plan is sufficient; no credit card is needed) and is \emph{not required}. You will not be penalized for not doing this.  
 If you do try it, you will see that while the simulator yields perfect results, the hardware produces noisy results with a distribution of outcomes. This illustrates why NISQ-era devices must eventually give way to fault-tolerant error-corrected quantum computers (FTECQC) with logical qubits to achieve reliable results.
 
 % ---------------- Bonus A ----------------
-\bonus{Time-Dependent Schr\"odinger Dynamics and Quantum Control}{25}
+\bonus{Time-Dependent Schr\"odinger Dynamics and Quantum Control}{15}
 \begin{summary}
-This problem develops the operator solution to the time-dependent Schr\"odinger equation, its unitarity, and a concrete example of engineering dynamics to realize a desired one-qubit operation. This also serves as a gentle entry point to quantum optimal control. This is how we begin to think about how to evolve quantum systems in such a way to achieve unitary operations on qubits, exiting team! \smiley{}.
+This problem develops the operator solution to the time-dependent Schr\"odinger equation, its unitarity, and a concrete example of engineering dynamics to realize a desired one-qubit operation. This also serves as a gentle entry point to quantum optimal control. This is how we begin to think about how to evolve quantum systems in such a way to achieve unitary operations on qubits, exciting team! \smiley{}.
 
 The time-dependent Schr\"odinger equation is the first-order linear differential equation
 \[
@@ -232,7 +243,7 @@ The Schr\"odinger equation governs how $\ket{\psi(t)}$ evolves under $H(t)$, ens
 \end{summary}
 
 \begin{enumerate}[label=(\alph*)]
-  \item Consider the generation solution to this equation: $\ket{\psi(t)}=U(t)\ket{\psi(0)}$, $U(t)=e^{-\tfrac{i}{\hbar}\int_0^t H(\tau)d\tau}$, and prove it solves the Schr\"odinger equation.
+  \item Assume the Hamiltonian commutes with itself at different times, $[H(t),H(t')]=0$ for all $t,t'$ (this is automatic if $H$ is time-independent). Consider the general solution to this equation under that assumption: $\ket{\psi(t)}=U(t)\ket{\psi(0)}$, $U(t)=e^{-\tfrac{i}{\hbar}\int_0^t H(\tau)d\tau}$, and prove it solves the Schr\"odinger equation. \textit{(Without this assumption the solution is a time-ordered exponential, which is beyond the scope of this problem.)}
   \item Prove $U(t)$ is unitary if $H(t)$ is Hermitian. A matrix $U(t)$ is said to be \textbf{unitary} if 
 \[
 U^\dagger(t)\,U(t) \;=\; U(t)\,U^\dagger(t) \;=\; I,
@@ -248,21 +259,21 @@ Hermiticity ensures that the eigenvalues of the Hamiltonian are real, so that me
   \item For $H(t)=\hbar\Omega \begin{bmatrix}
 0 & 1 \\
 1 & 0
-\end{bmatrix}$ on $[0,1]$, compute $U(t)$, and choose complex number, $\Omega$,  so $U(1)$ swaps $\alpha,\beta$.
+\end{bmatrix}$ on $[0,1]$, compute $U(t)$, and choose a real number $\Omega$ so that $U(1)$ swaps $\alpha,\beta$ (up to a global phase). Note $\Omega$ must be real so that $H(t)$ stays Hermitian.
   \item Show $\ket{\psi(1)}$ is normalized e.g. the sum of the probabilities equals 1.
   \item Identify the effective one-qubit gate implemented from the time evolution of the quantum system over $t\in[0,1]$. 
 \end{enumerate}
 
 % ---------------- Bonus B ----------------
-\bonus{Adding 2+2 on a Quantum Computer}{25}
+\bonus{Adding 2+2 on a Quantum Computer}{15}
 \begin{summary}
-Go read about ripple carry adders as a mini-project. Implement a 2-bit ripple-carry quantum adder and verify its behavior on the input $2+2$. You’ll simulate the circuit, confirm the output, and optionally test it on hardware. Important point: In binary we read right to left e.g. $2$ in binary would be $10$ - however for a quantum state we would represent this as $\ket{01}$ (going left to right). In Qiskit when you measure a quantum state into a binary representation - the register follows the binary format. For example if we read out the quantum state $\ket{01}$, you would see in the register $10$ (flipped).
+Go read about ripple carry adders as a mini-project. Implement a 2-bit ripple-carry quantum adder and verify its behavior on the input $2+2$. You’ll simulate the circuit, confirm the output, and optionally test it on hardware. Important point: In binary the rightmost bit is the least significant, e.g. $2 = 10_2$. In lecture we write kets as $\ket{q_0 q_1 \cdots}$ with $q_0$ on the left, so if you store $a_0$ (the least significant bit) on $q_0$ and $a_1$ on $q_1$, the value $2$ is the ket $\ket{q_0 q_1}=\ket{01}$. Qiskit is little-endian: it prints bitstrings as $q_{n-1}\cdots q_1 q_0$, so that same state shows up in the measurement register as \texttt{10}. Nothing physical changed -- only the labelling did (see the ``indexing trap'' slide in lecture).
 \end{summary}
 
 \begin{enumerate}[label=(\alph*)]
   \item Implement a 2-bit ripple-carry adder with two 2-qubit registers ($a_1a_0$, $b_1b_0$) and carry $c$.
   \item Prepare $a=2$ and $b=2$ in binary ($10_2$ each), with $c=0$.
-  \item For the correct binary inputs, work through the quantum circuit (either by hand or with computer) to work out the expected result $2+2=4=100_2$. Show how this appears as $(s_1s_0,c_{\text{out}})$.
+  \item For the correct binary inputs, work through the quantum circuit (either by hand or with computer) to work out the expected result $2+2=4=100_2$. Show how this appears as $(s_0,s_1,c_{\text{out}})$ on your qubits and as a bitstring in the Qiskit register.
   \item Simulate and record the dominant measurement outcome.
   \item (Optional) Run on hardware ($\sim$100 shots). Compare simulator vs. noisy hardware outcomes.
   \item State clearly your measurement mapping for $(s_0,s_1,c_{\text{out}})$. Hint: follow the important point I mentioned  - so you really internalize the ordering of bits in a qubit versus binary representation/register \smiley{}.
