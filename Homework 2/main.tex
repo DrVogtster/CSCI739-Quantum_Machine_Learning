@@ -160,6 +160,11 @@ Let \(\pi = 3.14159\ldots\). Write
   \[
   \ket{\psi_{\mathrm{basis}}^{(n)}} \;=\; \ket{\mathrm{BCD}(S_\pi)}\;\otimes\; \bigotimes_{i=1}^{n}\ket{\mathrm{BCD}(d_i)}.
   \]
+  Here \(\bigotimes\) is shorthand for a repeated tensor product, just as \(\sum\) is shorthand for a repeated sum:
+  \[
+  \bigotimes_{i=1}^{n}\ket{v_i} \;=\; \ket{v_1}\otimes\ket{v_2}\otimes\cdots\otimes\ket{v_n},
+  \]
+  with the factors taken in order from \(i=1\) (leftmost) to \(i=n\) (rightmost). The order matters, because the tensor product is not commutative. For example, \(\ket{0}^{\otimes 3}=\bigotimes_{i=1}^{3}\ket{0}=\ket{0}\otimes\ket{0}\otimes\ket{0}=\ket{000}\).\par\smallskip
   \emph{Example (for \(n=2\)):} \([3,1,4]\mapsto \ket{0011}\otimes\ket{0001}\otimes\ket{0100} = \ket{0011\,0001\,0100}\).
   State the qubit count \(4(n{+}1)\) and depth needed (just \(X\)-initializations).  
   \emph{Alternative (optional):} a two-register binary scheme with an \(I\)-qubit integer register for \(S_\pi\) (here \(I=2\)) and a \(k(n)=\lceil n\log_2 10\rceil\)-qubit fractional register holding the first \(k(n)\) \emph{binary} fractional bits of \(\pi\). Do the basis encoding for $n=3$.
