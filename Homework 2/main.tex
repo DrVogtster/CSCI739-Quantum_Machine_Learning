@@ -266,7 +266,16 @@ Construct minimal-depth circuits that prepare each Bell state from $\ket{00}$, t
 
 \begin{enumerate}[label=(\alph*)]
   \item \textbf{Synthesis from $\ket{00}$.} Using all or some subset of the gates in $\{X,Y,Z,H,\mathrm{CNOT}\}$, propose a circuit for each Bell state, prove correctness, report depth and CNOT count, and argue minimality. If you cannot prove minimality, give the bounds you can justify. For example, finding a depth-3 circuit shows the minimum depth is \emph{at most} 3 (an upper bound). Showing that no shallower circuit can work gives a lower bound. For instance, a Bell state is entangled, so at least one CNOT is required.
-  \item \textbf{RL environment.} Define an MDP: state representation, action set \newline $\{X_0,X_1,Y_0,Y_1,Z_0,Z_1,H_0,H_1,\mathrm{CNOT}_{0\to1},\mathrm{CNOT}_{1\to0}\}$, transition, termination.
+  \item \textbf{RL environment.} A \emph{Markov decision process} (MDP) is the standard mathematical model of an RL problem. It is a tuple $(\mathcal{S},\mathcal{A},P,R,\gamma)$:
+  \begin{itemize}
+    \item $\mathcal{S}$, the set of \emph{states} the agent can be in;
+    \item $\mathcal{A}$, the set of \emph{actions} it can take;
+    \item $P(s'\mid s,a)$, the \emph{transition} rule giving the probability of moving to state $s'$ after taking action $a$ in state $s$ (here it is deterministic: applying a gate produces exactly one new state);
+    \item $R$, the \emph{reward} the agent receives (see part (c));
+    \item $\gamma\in[0,1]$, a \emph{discount factor} weighting future rewards (you may take $\gamma=1$ for these short episodes).
+  \end{itemize}
+  ``Markov'' means the next state depends only on the current state and action, not on the earlier history. An \emph{episode} runs from a start state until a \emph{termination} condition is met.
+  Define the MDP for this problem: the state representation (e.g., the current two-qubit statevector, possibly with the step count), the action set \newline $\{X_0,X_1,Y_0,Y_1,Z_0,Z_1,H_0,H_1,\mathrm{CNOT}_{0\to1},\mathrm{CNOT}_{1\to0}\}$, the transition, and the termination (e.g., fidelity above a threshold or a maximum number of gates).
   \item \textbf{Objective with depth penalty.} For target $\ket{\phi}$, use fidelity $F=|\braket{\phi|\psi}|^2$ and terminal reward
   \(
   R(\tau)=F_T-\lambda L-\kappa C
