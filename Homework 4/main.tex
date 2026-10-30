@@ -12,6 +12,7 @@
 \usepackage{quantikz}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,calc}
+\usepackage{booktabs}
 \usepackage{MnSymbol,wasysym}
 \newenvironment{summary}{\par\noindent\textbf{Summary.} }{\par}
 
@@ -22,20 +23,50 @@
 \maketitle
 
 \begin{center}
-\textit{You made it, team. This homework continues our exploration from expressivity to practicality: from the theoretical foundation of quantum neural networks to their real implementation limits. You’ll confront how quantum encodings shape function classes (P1), how depth affects performance in both classical and quantum learning (P2), and—through the bonuses—how hardware, state complexity, and simulation feasibility bound what’s possible on current machines. Each problem is a lens on scalability, trainability, and the physics of information. You got this. \smiley{}}
+\textit{You made it, team. This homework moves from expressivity to practicality: from the theoretical foundations of quantum neural networks to their real implementation limits. You will see how quantum encodings shape the functions a model can represent (P1), how depth affects performance in classical and quantum learning (P2), and, through the bonuses, how hardware, state complexity, and simulation cost bound what is possible on current machines. This time you also get to choose your path: work through the problems, or take on a small research project on MNIST. Each problem is a lens on scalability, trainability, and the physics of information. You got this. \smiley{}}
 \end{center}
 
 \vspace{1em}
 \noindent
+\textbf{Choose your path (this homework is special).}
+Full credit (100 pts) can be earned in either of two ways:
+\begin{itemize}
+  \item \textbf{Path 1 — Problems:} Problems 1 and 2 (50 pts each).
+  \item \textbf{Path 2 — MNIST project:} the quantum MNIST project (100 pts), where you study encodings, what is and is not doable, and PCA-compressed versus full-input models.
+\end{itemize}
+You may also do \emph{both} paths, and the bonus problems are open to everyone. The points add up:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Component & Points \\
+\midrule
+Problem 1 — Expressivity and universal approximation & 50 \\
+Problem 2 — Classical vs.\ quantum networks on a sine & 50 \\
+MNIST project — Encodings, PCA, and VQC/QNN classifiers & 100 \\
+Bonus A — Diagonal Hamiltonian and VQE scaling & 15 \\
+Bonus B — Complexity of quantum state preparation & 15 \\
+Bonus C — Multivariate sine regression & 20 \\
+\midrule
+Everything & 250 \\
+Typeset in \LaTeX{} & +10 \\
+\midrule
+\textbf{Maximum possible} & \textbf{260} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
 \textbf{Structure overview:}
 \begin{itemize}
   \item \emph{P1:} Theoretical expressivity and the universal approximation property of QNNs.
-  \item \emph{P2:} Empirical study of depth and performance in classical vs. quantum neural networks.
-  \item \emph{Bonus A:} The “spooky” diagonal Hamiltonian—analytical vs.\ VQE ground state scaling.
+  \item \emph{P2:} Empirical study of depth and performance in classical vs.\ quantum neural networks.
+  \item \emph{MNIST project:} Encodings, resource limits, and PCA-compressed vs.\ full-input quantum and classical classifiers.
+  \item \emph{Bonus A:} The ``spooky'' diagonal Hamiltonian: analytical vs.\ VQE ground-state scaling.
   \item \emph{Bonus B:} The complexity hierarchy of quantum state preparation.
   \item \emph{Bonus C:} Multivariate sine regression under increasing input dimension and depth.
 \end{itemize}
-Use lectures, notes, the internet and each other to research more on the problems and  conquer this homework, team! Have fun \smiley{}! Also:
+Use lectures, notes, the internet, and each other to research the problems and conquer this homework, team! Have fun \smiley{}! Also:
 % ============================================
 \newpage
 
@@ -50,7 +81,7 @@ Use lectures, notes, the internet and each other to research more on the problem
 \section*{Problem 1 — Expressivity and Universal Approximation in Quantum Neural Networks (50 pts)}
 
 \begin{summary}
-We study how data encodings and parameterized unitaries determine the expressivity of quantum neural networks (QNNs). You will derive conditions under which a QNN can approximate nonlinear functions over classical inputs, compare encoding choices, and connect these results to the universal approximation theorem for classical neural networks.
+We study how data encodings and parameterized unitaries determine the expressivity of quantum neural networks (QNNs). You will derive conditions under which a QNN can approximate nonlinear functions of classical inputs, compare encoding choices, and connect these results to the universal approximation theorem for classical neural networks.
 \end{summary}
 
 A general QNN defines the function
@@ -71,29 +102,31 @@ where
 \item $U_\phi(x)$ is the \textbf{encoding unitary} (basis, angle, or amplitude encoding),
 \item $U(\boldsymbol{\theta})$ is the \textbf{trainable ansatz} of parameterized gates,
 \item $M$ is the measurement observable (often $Z$ or $Z_i$),
-\item and $f_{\mathrm{QNN}}(x;\boldsymbol{\theta})\in[-1,1]$ is the predicted value.
+\item and $f_{\mathrm{QNN}}(x;\boldsymbol{\theta})\in[-1,1]$ is the predicted value (for $M$ with eigenvalues $\pm1$).
 \end{itemize}
 
 \begin{enumerate}[label=(\alph*)]
-\item \textbf{Encoding and expressivity.}  
-Compare basis encoding $\ket{x}\mapsto\ket{x}$ and angle encoding $\ket{0}\mapsto R_y(\pi x)\ket{0}$.  
-Show that for angle encoding, $f_{\mathrm{QNN}}(x;\theta)$ becomes a trigonometric polynomial in $x$. Discuss why this nonlinearity increases representational capacity relative to basis encoding.
+\item \textbf{Encoding and expressivity.}
+Compare basis encoding, which maps a bitstring $x\in\{0,1\}^n$ to the computational-basis state $\ket{x}$, with angle encoding, which maps a real number $x$ to $R_y(\pi x)\ket{0}$.
+Show that for one-qubit angle encoding, $f_{\mathrm{QNN}}(x;\theta)$ is a trigonometric polynomial in $x$ of the form $a_0+a_1\cos(\pi x)+b_1\sin(\pi x)$, with coefficients that depend on $\theta$.
+Discuss why this smooth nonlinearity increases representational capacity relative to basis encoding, where the model can only assign values to the $2^n$ discrete inputs.
 
-\item \textbf{Simple one-qubit example.}  
-Let $U_\phi(x)=R_y(\pi x)$, $U(\theta)=R_y(\theta)$, and $M=Z$.  
+\item \textbf{Simple one-qubit example.}
+Let $U_\phi(x)=R_y(\pi x)$, $U(\theta)=R_y(\theta)$, and $M=Z$.
 Compute
 \[
 f_{\mathrm{QNN}}(x;\theta)
-=\bra{0}R_y(-\pi x)R_y(-\theta)Z R_y(\theta)R_y(\pi x)\ket{0}.
+=\bra{0}R_y(-\pi x)R_y(-\theta)\,Z\,R_y(\theta)R_y(\pi x)\ket{0}.
 \]
-Simplify analytically and describe the functional form of $f_{\mathrm{QNN}}(x;\theta)$.
+Simplify analytically and describe the functional form of $f_{\mathrm{QNN}}(x;\theta)$. Which functions of $x$ can this model represent, and which can it not?
 
-\item \textbf{Universal approximation.}  
-Discuss qualitatively how multi-qubit, layered QNNs can approximate arbitrary continuous functions $f:\mathbb{R}^d\to[-1,1]$, analogous to classical feedforward networks.  
-Relate this to the idea that as circuit depth grows, the space of realizable trigonometric combinations becomes dense in $C([0,1]^d)$.
+\item \textbf{Universal approximation.}
+Discuss qualitatively how multi-qubit, layered QNNs can approximate arbitrary continuous functions $f:[0,1]^d\to[-1,1]$, analogous to classical feedforward networks.
+Relate this to the idea that as the number of encoding gates (through more qubits or by re-uploading the data in each layer) grows, the set of realizable trigonometric polynomials becomes dense in $C([0,1]^d)$.
 
-\item \textbf{Relationship between classical and quantum NN.}   
-Why would a QNN restricted to linear encodings and shallow layers collapse to a classical linear model?
+\item \textbf{Relationship between classical and quantum NNs.}
+Suppose each feature enters the circuit only once, through a single rotation angle, and the ansatz is a single shallow layer. Show that $f_{\mathrm{QNN}}$ is then a linear combination of a small, fixed set of features such as $\{1,\cos(\pi x_k),\sin(\pi x_k)\}$ (and their products, if the layer entangles qubits).
+Explain why such a model is no more powerful than a classical linear model on those features, and what has to change (depth, re-uploading, entanglement) to go beyond it.
 \end{enumerate}
 
 % ============================================
@@ -101,8 +134,8 @@ Why would a QNN restricted to linear encodings and shallow layers collapse to a 
 \section*{Problem 2 — Classical vs.\ Quantum Neural Networks on a Sine Function (50 pts)}
 
 \begin{summary}
-You will implement both a classical and quantum neural network to learn a one-dimensional sine function.  
-By varying the number of layers, you will observe when additional depth helps and when it hurts, illustrating the interplay between expressivity and trainability.
+You will implement a classical and a quantum neural network to learn a one-dimensional sine function.
+By varying the number of layers, you will observe when additional depth helps and when it does not, illustrating the interplay between expressivity and trainability. You will also see that \emph{how} a quantum model is layered matters as much as how many layers it has.
 \end{summary}
 
 \paragraph{Target function.}
@@ -111,69 +144,149 @@ y(x) = \sin(2\pi x), \qquad x\in[0,1].
 \]
 
 \paragraph{Dataset.}
-Sample $N_{\text{train}}=64$ uniformly spaced training points and $N_{\text{test}}=256$ test points.
+Use $N_{\text{train}}=64$ uniformly spaced training points and $N_{\text{test}}=256$ uniformly spaced test points.
 
-\paragraph{Objective (common for both models).}
+\paragraph{Objective (common to both models).}
 \[
-\mathcal{L} = \frac{1}{N}\sum_{i=1}^N \big(\hat{y}(x_i;\boldsymbol{\theta}) - y(x_i)\big)^2,
+\mathcal{L}(\boldsymbol{\theta}) = \frac{1}{N}\sum_{i=1}^N \big(\hat{y}(x_i;\boldsymbol{\theta}) - y(x_i)\big)^2,
 \]
-where $\hat{y}$ is the output of the model (let it be classical or quantum).
+where $\hat{y}$ is the output of the model (classical or quantum).
+
 \subsection*{Classical model (MLP baseline)}
-Use a multilayer perceptron with 1 input, 1 output, and hidden layers of width $\ge 16$ with $\tanh$ activation.  
-Train for $L\in\{1,2,4,8\}$ hidden layers using Adam or another optimizer.  
+Use a multilayer perceptron with 1 input, 1 output, and hidden layers of width $\ge 16$ with $\tanh$ activation.
+Train for $L\in\{1,2,4,8\}$ hidden layers using Adam or another optimizer of your choice (keep it fixed across $L$).
 Plot train/test MSE vs.\ epochs and compare performance across $L$.
 
 \subsection*{Quantum model (QNN)}
 
 \paragraph{Encoding.}
-Angle encoding identical in structure to Problem 1:
+Angle encoding, as in Problem 1:
 \[
 U_\phi(x) = R_y(\pi x).
 \]
 
-\paragraph{Ansatz structure (one-qubit case).}
-Each layer applies a rotation followed by an optional entangler (identity here):
+\paragraph{(i) Warm-up: a stacked $R_y$ ansatz.}
+Consider first the ansatz used in Problem 1, stacked $L$ times,
 \[
 U(\theta_1,\ldots,\theta_L) = R_y(\theta_L)\cdots R_y(\theta_1).
+\]
+Show that this model gives exactly the same function class for every $L$, and find that class. Can it fit $\sin(2\pi x)$ for any $L$? Why not? (Hint: do rotations about the same axis commute? What frequencies in $x$ can appear?)
+
+\paragraph{(ii) Data re-uploading ansatz (train this one).}
+To make depth matter, re-upload the data in every layer and use rotations about two different axes:
+\[
+U_L(x;\boldsymbol{\theta})
+=
+\prod_{\ell=1}^{L}\Big[R_y(\theta_{\ell,1})\,R_z(\theta_{\ell,2})\,R_y(\pi x)\Big]
+\qquad\text{(rightmost factor, $\ell=1$, acts first)}.
 \]
 
 \paragraph{Model output.}
 \[
 f_{\mathrm{QNN}}(x;\boldsymbol{\theta})
 =
-\bra{0}U_\phi(x)^\dagger U(\boldsymbol{\theta})^\dagger Z U(\boldsymbol{\theta})U_\phi(x)\ket{0}.
+\bra{0}U_L(x;\boldsymbol{\theta})^\dagger\, Z\, U_L(x;\boldsymbol{\theta})\ket{0}.
 \]
-Estimate $\langle Z\rangle$ by shot-based sampling ($S$ shots).  
-Convert to probability $p=(1-\langle Z\rangle)/2$ if needed.
+Estimate $\langle Z\rangle$ by shot-based sampling with $S$ shots, for example $S=1000$, using $\widehat{\langle Z\rangle}=(n_0-n_1)/S$, where $n_0$ and $n_1$ count the outcomes $0$ and $1$. Compare against an exact statevector simulation (no shots).
 
 \paragraph{Optimization.}
-Minimize $\mathcal{L}_{\text{QNN}}$ via parameter-shift gradient:
+For a gate of the form $e^{-i\theta P/2}$ with $P$ a Pauli operator (such as $R_y$ and $R_z$), the parameter-shift rule gives the exact derivative of the \emph{expectation value}:
+\[
+\frac{\partial f_{\mathrm{QNN}}}{\partial \theta}
+=\frac{1}{2}\Big[f_{\mathrm{QNN}}\big(\theta+\tfrac{\pi}{2}\big)-f_{\mathrm{QNN}}\big(\theta-\tfrac{\pi}{2}\big)\Big].
+\]
+The rule applies to $f_{\mathrm{QNN}}$, not directly to the loss. Use the chain rule to get the gradient of the MSE:
 \[
 \frac{\partial \mathcal{L}}{\partial \theta}
-=\frac{1}{2}\big[\mathcal{L}(\theta+\tfrac{\pi}{2})-\mathcal{L}(\theta-\tfrac{\pi}{2})\big].
+=\frac{2}{N}\sum_{i=1}^{N}\big(f_{\mathrm{QNN}}(x_i;\boldsymbol{\theta})-y(x_i)\big)\,\frac{\partial f_{\mathrm{QNN}}(x_i;\boldsymbol{\theta})}{\partial \theta}.
 \]
 
 \paragraph{Experiments.}
 For $L\in\{1,2,4,8\}$:
 \begin{itemize}
-\item Train both the MLP and QNN on the same data.
+\item Train both the MLP and the re-uploading QNN on the same data.
 \item Compare MSE and convergence behavior.
-\item Discuss why depth helps initially but may cause vanishing gradients in QNNs.
+\item What is the smallest $L$ for which the QNN can represent $\sin(2\pi x)$ exactly? Relate this to the frequencies in $x$ that $L$ encoding gates can produce.
+\item Discuss why depth helps at first, and why it may slow training or shrink gradients as $L$ grows further.
 \end{itemize}
 
 \paragraph{Deliverables.}
-For both the classical and quantum simulations plots of predicted vs.\ true $\sin(2\pi x)$, loss vs.\ epochs, and gradient norms vs. \ epochs. Notice anything interesting? \smiley{}
+For both the classical and quantum models: plots of predicted vs.\ true $\sin(2\pi x)$, loss vs.\ epochs, and gradient norm vs.\ epochs, for each $L$. Include your answer to the warm-up (i). Notice anything interesting? \smiley{}
 
 % ============================================
 \newpage
-\section*{Bonus A (the spooky question that disappeared from HW3 and returned to HW4) — Ground States for a Purely Diagonal $n$-Qubit Hamiltonian with Indexed Spectrum (25 pts)}
+\section*{Path 2 — Quantum MNIST Project: Encodings, PCA, and What Is (and Is Not) Doable (100 pts)}
 
 \begin{summary}
-We study an $n$-qubit Hamiltonian that is strictly diagonal in the computational basis and whose diagonal entries increase with the integer index of the basis state. You will (i) derive the spectrum and ground state analytically, (ii) compare classical storage scaling $2^n$ vs.\ quantum $n$, and (iii) implement a minimal VQE that estimates the ground energy by sampling $Z$-basis measurements. This problem highlights how even simple diagonal Hamiltonians illustrate exponential classical–quantum representational gaps.
+This project replaces Problems 1 and 2 for full credit (or adds to them, if you do both). You will build variational quantum circuit (VQC) / quantum neural network (QNN) classifiers for handwritten digits from MNIST. A $28\times28$ image has $784$ pixels, far more than any qubit budget we can simulate with a naive encoding. You will therefore (i) study which encodings are possible and what each one costs, (ii) compress the images with principal component analysis (PCA) and train QNNs on the low-dimensional data, and (iii) compare these compressed models with models that see the full input. The goal is not a record accuracy; it is an honest, quantitative picture of what quantum models can and cannot do with real data today.
 \end{summary}
 
-\textbf{Definition (diagonal by basis index).}  
-Label computational-basis states $\ket{j}$ by $j\in\{0,1,\dots,2^n-1\}$ with binary expansion. Define
+\paragraph{Data.}
+Load MNIST, for example with \texttt{sklearn.datasets.fetch\_openml('mnist\_784')} or \texttt{torchvision.datasets.MNIST}. Start with a binary task:
+\begin{itemize}
+\item an easy pair, \textbf{0 vs.\ 1};
+\item a harder pair of your choice, e.g.\ \textbf{3 vs.\ 5} or \textbf{4 vs.\ 9}.
+\end{itemize}
+Quantum simulation is slow, so subsample: for example $1000$ training and $500$ test images per task, balanced between the two classes. Use the same subsets for every model. Scale pixel values to $[0,1]$.
+
+\paragraph{PCA.}
+Fit PCA on the \emph{training set only} (fitting on the test set leaks information) and keep the top $k$ components, $k\in\{2,4,8,16\}$. Then rescale each component to an angle range such as $[0,\pi]$ using the training-set minimum and maximum.
+
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Data, PCA, and classical baselines (15 pts).}
+\begin{itemize}
+\item Plot the cumulative explained variance vs.\ $k$, and show a few images reconstructed from $k=2,4,8,16$ components next to the originals.
+\item Train two classical baselines, logistic regression and a small MLP, on (1) the full $784$-pixel input and (2) the PCA-$k$ features for each $k$. Report test accuracy and the number of trainable parameters.
+\item For $k=2$, make a scatter plot of the two classes in PCA space. Is the easy pair already separable?
+\end{itemize}
+
+\item \textbf{Encodings: what is and is not doable (20 pts).}
+For each encoding below, state how many qubits it needs and how the circuit depth (or gate count) needed to load one image scales, both for the full $784$-pixel image and for PCA-$k$ features. Then state whether you can simulate it on your machine and whether it could run on current NISQ hardware. Summarize in a table.
+\begin{itemize}
+\item \textbf{Basis encoding:} binarize the pixels and write them into computational-basis states.
+\item \textbf{Angle encoding:} one feature per qubit, $\bigotimes_k R_y(x_k)$.
+\item \textbf{Dense angle encoding:} two features per qubit, e.g.\ $R_z(x_{2k})R_y(x_{2k-1})$.
+\item \textbf{Amplitude encoding:} the normalized feature vector becomes the amplitudes of an $m$-qubit state, $\ket{\psi(x)}=\sum_j \frac{x_j}{\|x\|}\ket{j}$. A full image, zero-padded to $1024=2^{10}$ entries, fits on $m=10$ qubits.
+\item \textbf{Data re-uploading:} angle encoding repeated in every layer, as in Problem 2.
+\end{itemize}
+Discuss: a $784$-qubit angle-encoded circuit \emph{without} entangling gates is easy to simulate classically (why?), while the same circuit \emph{with} entangling gates is not. Amplitude encoding is qubit-cheap but needs $\mathcal{O}(2^m)$ gates for a general state (connect to Bonus B if you do it). Which entries of your table are impossible, which are possible but impractical, and which are easy?
+
+\item \textbf{QNN on PCA features (25 pts).}
+Implement a VQC classifier on the PCA-$k$ features for $k\in\{2,4,8\}$ (and $16$ if your simulator allows it), using angle or dense angle encoding with $k$ or $k/2$ qubits.
+\begin{itemize}
+\item Ansatz: $L\in\{1,2,4\}$ layers of single-qubit rotations ($R_y$, $R_z$) followed by a ring of CNOTs (a single CNOT when there are only 2 qubits). Re-uploading is encouraged.
+\item Readout: $\langle Z_1\rangle$ mapped to a class probability $p=(1-\langle Z_1\rangle)/2$, or a trainable linear head on all $\langle Z_k\rangle$ as in Bonus C.
+\item Loss: binary cross-entropy or MSE; state which one you use.
+\item Gradients: autodifferentiation through a statevector simulator is fine for training, but verify the parameter-shift gradient against it for at least one model and report the agreement.
+\item Report train/test accuracy and loss curves for every $(k,L)$, and the gradient norm at initialization vs.\ the number of qubits and $L$. Do you see signs of a barren plateau?
+\end{itemize}
+
+\item \textbf{A full-input quantum model (15 pts).}
+Build a quantum model that sees the \emph{entire} image: amplitude-encode the padded $1024$-dimensional image on $10$ qubits and train a VQC on top of it. You may use your simulator's direct state initialization; report how many gates a real circuit for this state preparation would need (e.g.\ by transpiling the \texttt{initialize}/\texttt{StatePreparation} circuit in Qiskit for a few images). Compare accuracy and cost with the amplitude-encoded PCA-$k$ models ($k=16$ fits on $4$ qubits). Does the extra information in the full image help the quantum model, and what does it cost?
+
+\item \textbf{Comparison (15 pts).}
+On one figure per task, plot test accuracy vs.\ input dimension $k$ for: logistic regression, MLP, and your QNN(s), with the full-input classical and quantum results as reference lines. Make a second plot of test accuracy vs.\ number of trainable parameters. Also report training wall-clock time. Where do the quantum models match the classical ones, and where do they fall behind?
+
+\item \textbf{Report and reflection (10 pts).}
+Write a short report (about 4–6 pages) with your plots, tables, and the encoding table from (b). Answer: How much of the digit information survives PCA at small $k$, and is that why small QNNs can work at all? Which encodings would you choose for a real quantum device today, and why? What would have to change, in hardware or in algorithms, for a quantum model to use all $784$ pixels without PCA? Include your code.
+
+\item \textbf{(Optional, for fun) Going further.}
+Try the hardest version you can: a 10-class classifier (e.g.\ one output qubit per class, or one-vs-rest), a run of your smallest trained model on IBM NISQ hardware with $S\in\{10,100,1000\}$ shots, or a hybrid model with a classical layer before the quantum circuit. Compare with your simulator results.
+\end{enumerate}
+
+\paragraph{Suggested tools.}
+Qiskit or PennyLane for circuits, \texttt{scikit-learn} for PCA and the classical baselines, and PyTorch or JAX if you want autodifferentiation. Your own NumPy statevector simulator is also welcome for $\le 12$ qubits.
+
+% ============================================
+\newpage
+\section*{Bonus A (the spooky question that disappeared from HW3 and returned in HW4) — Ground States of a Purely Diagonal $n$-Qubit Hamiltonian with an Indexed Spectrum (15 pts)}
+
+\begin{summary}
+We study an $n$-qubit Hamiltonian that is diagonal in the computational basis and whose diagonal entries increase with the integer index of the basis state. You will (i) derive the spectrum and ground state analytically, (ii) compare the classical storage cost $2^n$ with the quantum cost $n$, and (iii) implement a minimal VQE that estimates the ground energy by sampling $Z$-basis measurements. This problem shows how even a simple diagonal Hamiltonian illustrates the exponential gap between classical and quantum representations.
+\end{summary}
+
+\textbf{Definition (diagonal by basis index).}
+Label computational-basis states $\ket{j}$ by $j\in\{0,1,\dots,2^n-1\}$ using their binary expansion. Define
 \[
 H_n=\mathrm{diag}(E_j)_{j=0}^{2^n-1},\qquad E_j=j+1.
 \]
@@ -184,8 +297,8 @@ All off-diagonal elements are zero.
   \[
   \mathbf{b}=(b_{n-1}\dots b_1b_0)\in\{0,1\}^n,
   \]
-  corresponding to integer $j=\sum_{i=0}^{n-1}2^{\,i}b_i$.
-  \item The random variable \(J\) (“measurement outcome as integer”) has
+  corresponding to the integer $j=\sum_{i=0}^{n-1}2^{\,i}b_i$.
+  \item The random variable \(J\) (``measurement outcome as an integer'') has
   \[
   p_j=\Pr(J=j)=|\braket{j}{\psi}|^2.
   \]
@@ -206,162 +319,68 @@ For $S$ shots:
 \]
 
 \begin{enumerate}[label=(\alph*)]
-\item \textbf{Eigenvalues and eigenstates.}  
-Show that $\ket{j}=e_{j+1}$ (standard basis) is an eigenvector with eigenvalue $E_j=j+1$.
+\item \textbf{Eigenvalues and eigenstates.}
+Show that $\ket{j}=e_{j+1}$ (the $(j+1)$-th standard basis vector) is an eigenvector of $H_n$ with eigenvalue $E_j=j+1$.
 
-\item \textbf{Ground state and energy, and classical computational cost.}  
-Show $E_0^{(\mathrm{an})}(n)=1$ with ground state $\ket{0\cdots0}=e_1$.  
+\item \textbf{Ground state and energy, and classical computational cost.}
+Show that $E_0^{(\mathrm{an})}(n)=1$, with ground state $\ket{0\cdots0}=e_1$.
 
-Now reason about classical feasibility:  
-the Hamiltonian is $2^n\times2^n$ ($4^n$ real entries).  
-For $n=10$, this is $\sim10^6$ entries; for $n=40$, $\sim10^{24}$—impossible even on supercomputers.  
-A molecule such as $\mathrm{Fe}_2\mathrm{S}_2$ or a protein fragment mapped to $n\!\sim\!40$ logical qubits has a $2^{40}\!\times\!2^{40}$ Hamiltonian—far beyond HPC capacity.  
-Explain why an $n$-qubit quantum device represents these amplitudes implicitly, motivating VQE.
+Now reason about classical feasibility:
+the Hamiltonian is $2^n\times2^n$, so it has $4^n$ entries if stored as a dense matrix.
+For $n=10$ this is $\sim10^6$ entries; for $n=40$ it is $\sim10^{24}$, impossible even on supercomputers.
+A molecule such as $\mathrm{Fe}_2\mathrm{S}_2$, or a protein fragment mapped to $n\sim40$ logical qubits, has a $2^{40}\times2^{40}$ Hamiltonian, far beyond HPC capacity.
+Explain why an $n$-qubit quantum device represents these $2^n$ amplitudes implicitly, and how this motivates VQE.
 
-\item \textbf{Classical vs.\ quantum scaling.}  
-Plot $2^n$ vs.\ $n$ for $n=1,\dots,n_{\max}$ in the case of for $n=1,...,40$. in a log scale. Comment on the amount of classical versus quantum resources one needs to represent the $n$ two-level qubit system. Also, comment on the feasibility of finding the lowest energy and corresponding ground state in the case of $n=40$, leveraging state-of-the-art numerical eigenvector/eigenvalue solvers. Do we have a problem \smiley{}? How many qubits would you need to try to approximate the lowest energy state and the corresponding ground state?  
+\item \textbf{Classical vs.\ quantum scaling.}
+Plot $2^n$ and $n$ for $n=1,\dots,40$ on a logarithmic scale. Comment on the classical versus quantum resources needed to represent an $n$-qubit system. Also comment on the feasibility of finding the lowest energy and the corresponding ground state for $n=40$ with state-of-the-art numerical eigenvalue solvers. Do we have a problem \smiley{}? How many qubits would you need to approximate the lowest energy and the corresponding ground state on a quantum computer?
 
-% \item \textbf{VQE formulation.}  
-% \[
-% E_n(\boldsymbol{\theta})=\sum_{j}(j+1)|\braket{j}{\psi}|^2
-% =\langle j\rangle_{\boldsymbol{\theta}}+1.
-% \] \paragraph{Defining $\langle j \rangle$ and $\widehat{\langle j \rangle}$.}
-
-% Let the post-ansatz quantum state be
-% \[
-% \ket{\psi(\boldsymbol{\theta})} = U(\boldsymbol{\theta})\ket{0}^{\otimes n}.
-% \]
-% When measured in the computational ($Z$) basis, the outcome is a bitstring
-% \[
-% \mathbf{b} = (b_{n-1}\dots b_1b_0)\in\{0,1\}^n,
-% \]
-% which corresponds to an integer
-% \[
-% j = \sum_{i=0}^{n-1} 2^i\, b_i.
-% \]
-% We denote this random variable by $J$.
-
-% The \textbf{true expectation value} of this index under the state $\ket{\psi(\boldsymbol{\theta})}$ is
-% \[
-% \boxed{
-% \langle j \rangle_{\boldsymbol{\theta}}
-% =
-% \lim_{S \to \infty}
-% \frac{1}{S}\sum_{t=1}^{S} j^{(t)}
-% =
-% \sum_{j=0}^{2^n - 1} j \, |\braket{j}{\psi(\boldsymbol{\theta})}|^2,
-% }
-% \],
-% where
-% \[
-% \boxed{
-% \langle j \rangle
-% = 
-% \lim_{S \to \infty}
-% \frac{1}{S}\sum_{t=1}^{S} j^{(t)}.
-% }
-% \]
-% This represents the mean integer outcome that would be observed over infinitely many $Z$-basis measurements.
-
-% \vspace{0.5em}
-% In a real (or simulated) experiment with $S$ measurement shots, we form the \textbf{empirical estimator}
-% \[
-% \boxed{
-% \widehat{\langle j \rangle}_{\boldsymbol{\theta}}
-% =
-% \frac{1}{S}\sum_{t=1}^{S} j^{(t)},
-% }
-% \]
-% where each $j^{(t)}$ is the integer label of the $t$-th observed computational-basis outcome.
-
-% \vspace{0.5em}
-% The statistical uncertainty of this finite-shot estimator obeys
-% \[
-% \mathrm{Var}\big[\widehat{\langle j \rangle}\big]
-% =
-% \frac{\mathrm{Var}(J)}{S},
-% \qquad
-% \text{where}\quad
-% \mathrm{Var}(J)
-% =
-% \langle j^2 \rangle - \langle j \rangle^2.
-% \]
-% to estimate them: 
-% \noindent
-% In practice, given $S$ measurement outcomes $j^{(1)},\dots,j^{(S)}$:
-% \[
-% \widehat{\langle j \rangle} = \frac{1}{S}\sum_{t=1}^{S} j^{(t)}, 
-% \quad
-% \widehat{\langle j^2 \rangle} = \frac{1}{S}\sum_{t=1}^{S} \big(j^{(t)}\big)^2,
-% \]
-% \[
-% \widehat{\mathrm{Var}}(J)
-% =
-% \widehat{\langle j^2 \rangle} - \big(\widehat{\langle j \rangle}\big)^2,
-% \qquad
-% \widehat{\mathrm{Var}}\!\big[\widehat{\langle j \rangle}\big]
-% =
-% \frac{\widehat{\mathrm{Var}}(J)}{S}.
-% \]
-
-% \vspace{0.5em}
-% Finally, the \textbf{estimated energy} for the variational quantum eigensolver (VQE) is
-% \[
-% \widehat{E}_n(\boldsymbol{\theta})
-% =
-% \widehat{\langle j \rangle}_{\boldsymbol{\theta}} + 1,
-% \]
-% which serves as the cost function to be minimized during optimization.
-
-% Estimate $\widehat{\langle j\rangle}$ from $Z$-basis shots.
-
-\item \textbf{Ansatz (no entanglers).}  
+\item \textbf{Ansatz (no entanglers).}
 \[
 \ket{\psi(\boldsymbol{\theta})}=\bigotimes_{i=1}^n R_y(\theta_i)\ket{0}.
 \]
-Minimize $\widehat{E}_n=\widehat{\langle j\rangle}+1$ in two cases. First, analytically find the $\theta^*$ which minimizes the functional; and in the second case and also find minimize the functional using some  numerical optimization approach. Do you get the same answer between the two? Is the answer you found what you expect?
+Minimize $\widehat{E}_n=\widehat{\langle J\rangle}+1$ in two ways: first, find analytically the $\boldsymbol{\theta}^*$ that minimizes the energy; second, minimize it with a numerical optimizer of your choice. Do the two answers agree? Is the answer what you expected?
 
-For context: Let $b_i^{(t)} \in \{0,1\}$ denote the measurement outcome of the $i$-th qubit on the $t$-th shot, 
-where $i=0$ corresponds to the \textbf{least significant bit (LSB)} of the binary representation of the measured integer $j^{(t)}$. 
+For context: let $b_i^{(t)} \in \{0,1\}$ denote the measurement outcome of the $i$-th qubit on the $t$-th shot,
+where $i=0$ corresponds to the \textbf{least significant bit (LSB)} of the binary representation of the measured integer $j^{(t)}$.
 Formally, each $n$-qubit computational-basis outcome $\mathbf{b}=(b_{n-1}\dots b_1 b_0)$ corresponds to the integer
 \[
 j^{(t)} = \sum_{i=0}^{n-1} 2^{\,i}\, b_i^{(t)},
 \]
 where $b_0$ is the LSB (the rightmost bit) and $b_{n-1}$ is the most significant bit (MSB).
 
-Define $n^{(i)}_1 = \sum_{t=1}^S b_i^{(t)}$ as the number of shots in which qubit $i$ is measured in the $\ket{1}$ state, 
+Define $n^{(i)}_1 = \sum_{t=1}^S b_i^{(t)}$ as the number of shots in which qubit $i$ is measured in the state $\ket{1}$,
 and $\hat{p}_i = n^{(i)}_1 / S$ as the corresponding empirical probability. Then, because expectation values are linear,
 \[
 \boxed{
-\widehat{\langle j \rangle}
+\widehat{\langle J \rangle}
 = \sum_{i=0}^{n-1} 2^{\,i}\,\hat{p}_i
 = \sum_{i=0}^{n-1} 2^{\,i}\,\frac{n^{(i)}_1}{S}.
 }
 \]
 This bitwise expression is equivalent to computing
 \[
-\widehat{\langle j\rangle}
+\widehat{\langle J\rangle}
 =\frac{1}{S}\sum_{t=1}^{S} j^{(t)}
 =\sum_{j=0}^{2^n-1} j\,\frac{c_j}{S},
 \]
-where $c_j$ is the total number of times the outcome $j$ is observed among the $S$ shots.
+where $c_j$ is the number of times the outcome $j$ is observed among the $S$ shots.
 
-\item \textbf{Comparison across sizes.}  
-Plot $\widehat{E}_n^{(\mathrm{vqe})}$ vs.\ $E_0^{(\mathrm{an})}(n)=1$ and discuss variance growth with $n$.
+\item \textbf{Comparison across sizes.}
+Plot $\widehat{E}_n^{(\mathrm{vqe})}$ against $E_0^{(\mathrm{an})}(n)=1$ and discuss how the variance of the estimator grows with $n$ away from the optimum.
 
-\item \textbf{Resource limits.}  
-Track time/memory vs.\ $n$ and identify when simulation bottlenecks appear. What $n$ value does QISKIT complain on? Did you get to $40$ \smiley{} for this extremely simple version of a ground state problem where we know what the answer is? Comment on the difficulty of a classical computer to simulate the quantum system in general, and how this motivates the interest in VQC for determining the lowest energy and corresponding ground state of a Hamiltonian $H$.
+\item \textbf{Resource limits.}
+Track time and memory vs.\ $n$ and identify when simulation bottlenecks appear. At what value of $n$ does Qiskit's statevector simulator complain? Did you get to $40$ \smiley{} for this extremely simple ground-state problem, where we already know the answer? Comment on the difficulty of simulating a quantum system on a classical computer in general, and how this motivates the interest in VQCs for finding the lowest energy and the corresponding ground state of a Hamiltonian $H$.
 
-\item \textbf{(Optional) Real hardware shot sweep.}  
-Run for $S\in\{1,10,100\}$ and confirm $\mathrm{Var}[\widehat{\langle j\rangle}]=\mathrm{Var}(J)/S$.
+\item \textbf{(Optional) Real hardware shot sweep.}
+Run on IBM hardware for $S\in\{1,10,100\}$ and check that $\mathrm{Var}[\widehat{\langle J\rangle}]=\mathrm{Var}(J)/S$.
 \end{enumerate}
 
 % ============================================
 \newpage
-\section*{Bonus B — The Complexity of Quantum State Preparation (25 pts)}
+\section*{Bonus B — The Complexity of Quantum State Preparation (15 pts)}
 
 \begin{summary}
-We examine the difficulty of preparing quantum states. Although any normalized vector exists mathematically, preparing it physically by a finite circuit can range from trivial to impossible. You will reason through three regimes: (i) easily preparable states, (ii) exponentially hard states, and (iii) physically impossible states. This reveals how state-preparation complexity limits QNN and VQE ansätze. For each example  make the circuit and in terms of the parameter $n$ in big $\mathcal{O}$ notation give the depth of the the gate circuit depth required to prepare the state e.g. polynomial, exponential, or impossible. In the case of impossible, explain what physical law, rule, or concept makes the state not constructable \smiley{}.
+We examine how hard it is to prepare quantum states. Every normalized vector exists mathematically, but preparing it physically with a finite circuit can range from trivial to impossible. You will reason through three regimes: (i) easily preparable states, (ii) exponentially hard states, and (iii) states that no physical process can produce. This reveals how state-preparation complexity limits QNN and VQE ansätze. For each example, draw the circuit (where one exists) and give the circuit depth required to prepare the state in big-$\mathcal{O}$ notation as a function of $n$: polynomial, exponential, or impossible. For impossible states, explain which physical law, rule, or concept forbids them \smiley{}.
 \end{summary}
 
 \begin{enumerate}[label=(\alph*)]
@@ -371,55 +390,53 @@ We examine the difficulty of preparing quantum states. Although any normalized v
   \[
   \ket{\psi_{\mathrm{unif}}}=\frac{1}{\sqrt{2^n}}\sum_{j=0}^{2^n-1}\ket{j}.
   \]
-  
+
   \item \textbf{GHZ state:}
   \[
   \ket{\mathrm{GHZ}_n}=\frac{1}{\sqrt{2}}\big(\ket{0}^{\otimes n}+\ket{1}^{\otimes n}\big).
   \]
-  
+  Can you reduce the depth from $\mathcal{O}(n)$ to $\mathcal{O}(\log n)$?
 \end{itemize}
 
 \item \textbf{Computationally hard states.}
 \begin{itemize}
-  \item \textbf{Haar random:}
+  \item \textbf{Haar-random state:}
   \[
-  \ket{\psi_{\mathrm{Haar}}}=\sum_{j=0}^{2^n-1}c_j\ket{j}, \quad c_j\sim\mathcal{N}_{\mathbb{C}}(0,1), \ \sum_j|c_j|^2=1.
+  \ket{\psi_{\mathrm{Haar}}}=\sum_{j=0}^{2^n-1}c_j\ket{j}, \qquad c_j=\frac{g_j}{\sqrt{\sum_k |g_k|^2}},\quad g_j\sim\mathcal{N}_{\mathbb{C}}(0,1)\ \text{i.i.d.}
   \]
+  Use a counting argument (how many states can circuits with $G$ gates reach?) to argue that almost all such states need exponentially many gates.
 
   \item \textbf{Frustrated spin-glass ground state:}
   \[
   H=\sum_{\langle i,j\rangle}J_{ij}Z_iZ_j+\sum_i h_iZ_i,
   \]
-Where $Z_i = I \otimes I \otimes .... Z ...I \otimes I  $  e.g. a Z gate on the $i$-th qubit.
-
- 
+  where $Z_i = I \otimes \cdots \otimes I \otimes Z \otimes I \otimes \cdots \otimes I$ is a $Z$ gate on the $i$-th qubit.
+  This $H$ is diagonal, so its ground state is a computational-basis state. Explain why \emph{preparing} that state is easy once you know it, while \emph{finding} it is hard in general (NP-hard). How does this kind of hardness differ from that of the Haar-random state?
 \end{itemize}
 
 \item \textbf{Impossible states.}
 \begin{itemize}
-  \item Non-normalizable: e.g.\ position eigenstate $\ket{x}$.
-  \item No-cloning: cannot prepare $\ket{\psi}\otimes\ket{\psi}$ from unknown, general psi, $\ket{\psi}$.
-  \item Non-Hermitian eigenstate: cannot arise from unitary time evolution.
+  \item Non-normalizable states, e.g.\ a position eigenstate $\ket{x}$.
+  \item No-cloning: you cannot prepare $\ket{\psi}\otimes\ket{\psi}$ from a single copy of an unknown, general state $\ket{\psi}$.
+  \item Complex conjugation: you cannot deterministically map an unknown $\ket{\psi}$ to its complex conjugate $\ket{\psi^*}$. (Hint: is this map linear? Is it unitary?)
 \end{itemize}
-
-
-
-\textbf{Reflection:} How does state-preparation complexity constrain ansatz design in NISQ QML? Hint: data encoding is state preparation in the context of quantum machine learning. So this gets at the idea of some encodings may be easy, hard, or impossible, based on how you wish to encode your data. Also maybe think about depth of circuits and how that could be a problem in a NISQ era world \smiley{}.
 \end{enumerate}
+
+\textbf{Reflection:} How does state-preparation complexity constrain ansatz design in NISQ QML? Hint: data encoding \emph{is} state preparation in quantum machine learning, so some encodings are easy, some hard, and some impossible, depending on how you wish to encode your data. Also think about circuit depth and why it is a problem in the NISQ era \smiley{}.
 
 % ============================================
 \newpage
-\section*{Bonus C — Multivariate Sine Regression with Classical vs.\ Quantum Neural Networks (25 pts)}
+\section*{Bonus C — Multivariate Sine Regression with Classical vs.\ Quantum Neural Networks (20 pts)}
 
 \begin{summary}
-This bonus generalizes Problem 2 from a 1D sine to an $n$-variable target. You will implement both a classical neural network (MLP) and a quantum neural network (QNN) for regression on $x\in[0,1]^n$ using the \emph{same encoding structure} as Problem 2 but lifted to $n$ inputs. You will (i) define and minimize explicit MSE objectives for both models, (ii) specify the encoding and layer/ansatz structure, (iii) measure how performance changes with the number of layers $L$, and (iv) explore regimes where classical simulation remains feasible vs.\ becomes intractable. Optionally, you may attempt a smaller-$n$ instance on an IBM NISQ backend and comment on performance.
+This bonus generalizes Problem 2 from a one-dimensional sine to an $n$-variable target. You will implement a classical neural network (MLP) and a quantum neural network (QNN) for regression on $x\in[0,1]^n$, using the \emph{same re-uploading structure} as Problem 2 lifted to $n$ inputs. You will (i) define and minimize explicit MSE objectives for both models, (ii) specify the encoding and layer structure, (iii) measure how performance changes with the number of layers $L$, and (iv) explore where classical simulation remains feasible and where it becomes intractable. Optionally, you may run a small-$n$ instance on an IBM NISQ backend and comment on its performance.
 \end{summary}
 
 \paragraph{Target functions (choose one or do both).}
 \begin{enumerate}[label=(T\arabic*)]
-\item \textbf{Additive sine:} 
+\item \textbf{Additive sine:}
 \[
-y(x) \;=\; \sin\!\Big(2\pi\,\big(w^\top x +\big)\Big),
+y(x) \;=\; \sin\!\big(2\pi\, w^\top x\big),
 \quad x\in[0,1]^n,
 \]
 with fixed $w\in\mathbb{R}^n$ (e.g.\ $w=\tfrac{1}{\sqrt{n}}\mathbf{1}$).
@@ -430,20 +447,20 @@ y(x) \;=\; \prod_{k=1}^n \sin\!\big(2\pi\,x_k\big).
 \end{enumerate}
 
 \paragraph{Dataset.}
-Sample $N_{\text{train}}$ points $x_i\sim\mathrm{Unif}([0,1]^n)$ and compute labels $y_i$ from (T1) or (T2). Prepare a separate dense test grid (or random test set) to report generalization.
+Sample $N_{\text{train}}$ points $x_i\sim\mathrm{Unif}([0,1]^n)$ and compute labels $y_i$ from (T1) or (T2). Prepare a separate test set (a dense grid for small $n$, random points otherwise) to report generalization.
 
 % -------------------------------
 \subsection*{Classical model (baseline MLP)}
-Let $\hat y_{\text{MLP}}(x; \boldsymbol{w})$ be a fully connected network with $n$ inputs, $L$ hidden layers (width $\ge 16$ recommended), smooth activation (e.g.\ $\tanh$), and a linear scalar output head.
+Let $\hat y_{\text{MLP}}(x; \boldsymbol{w})$ be a fully connected network with $n$ inputs, $L$ hidden layers (width $\ge 16$ recommended), a smooth activation (e.g.\ $\tanh$), and a linear scalar output.
 
-\paragraph{Objective (explicit).}
+\paragraph{Objective.}
 \[
 \mathcal{L}_{\text{MLP}}
 \;=\;
 \frac{1}{N}\sum_{i=1}^{N}
 \big(\hat y_{\text{MLP}}(x_i;\boldsymbol{w}) - y_i\big)^2.
 \]
-Train with a fixed optimizer (e.g.\ Adam), learning rate, epochs, and batch size across all $L$ to enable fair comparison. Record train/test MSE and time per epoch.
+Keep the optimizer (e.g.\ Adam), learning rate, number of epochs, and batch size fixed across all $L$ for a fair comparison. Record train/test MSE and time per epoch.
 
 % -------------------------------
 \subsection*{Quantum model (QNN)}
@@ -454,38 +471,35 @@ Use $n$ qubits with input-local rotations,
 U_\phi(x) \;=\; \bigotimes_{k=1}^n R_y\!\big(\pi x_k\big).
 \]
 
-\paragraph{Layer / ansatz (define precisely).}
-A single \textbf{layer} at depth $\ell$ is
+\paragraph{Layer / ansatz.}
+A single \textbf{layer} at depth $\ell$ re-uploads the data, applies trainable rotations, and then entangles:
 \[
-U_{\text{layer}}^{(\ell)}(\boldsymbol{\theta}^{(\ell)})
+U_{\text{layer}}^{(\ell)}(x;\boldsymbol{\theta}^{(\ell)})
 \;=\;
+E\;\cdot\;
 \Big(\bigotimes_{k=1}^n R_y(\theta^{(\ell)}_{k,1})\,R_z(\theta^{(\ell)}_{k,2})\Big)
 \;\cdot\;
-\underbrace{\prod_{k=1}^{n}\mathrm{CNOT}_{k\to k{+}1}}_{\text{entangler ring with }n{+}1\equiv 1}.
+U_\phi(x),
 \]
-The depth-$L$ ansatz is the ordered product
+where the entangler $E=\prod_{k=1}^{n}\mathrm{CNOT}_{k\to k+1}$ is a ring with $n+1\equiv 1$ for $n\ge3$, and a single $\mathrm{CNOT}_{1\to2}$ for $n=2$.
+The depth-$L$ circuit is the ordered product
 \[
-U(\boldsymbol{\theta}) \;=\; \prod_{\ell=1}^{L} U_{\text{layer}}^{(\ell)}(\boldsymbol{\theta}^{(\ell)}),
-\qquad\text{(rightmost acts first)}.
+U_L(x;\boldsymbol{\theta}) \;=\; \prod_{\ell=1}^{L} U_{\text{layer}}^{(\ell)}(x;\boldsymbol{\theta}^{(\ell)}),
+\qquad\text{(rightmost factor, $\ell=1$, acts first)}.
 \]
 
 \paragraph{Readout and model output.}
-Measure Pauli-$Z$ on each qubit and combine via a \emph{trainable linear head} in classical post-processing:
+Measure Pauli-$Z$ on each qubit and combine the results with a \emph{trainable linear head} in classical post-processing:
 \[
-\mathbf{z}(x;\boldsymbol{\theta})
-=
-\big(\langle Z_1\rangle,\ldots,\langle Z_n\rangle\big)^\top,\qquad
 f_{\mathrm{QNN}}(x;\boldsymbol{\theta},\boldsymbol{\alpha})
 =
 \alpha_0 + \sum_{k=1}^n \alpha_k\, \langle Z_k\rangle,
-\]
-where
-\[
+\qquad
 \langle Z_k\rangle
-=\bra{0}^{\otimes n} U_\phi(x)^\dagger U(\boldsymbol{\theta})^\dagger Z_k\,U(\boldsymbol{\theta})U_\phi(x)\ket{0}^{\otimes n}.
+=\bra{0}^{\otimes n} U_L(x;\boldsymbol{\theta})^\dagger\, Z_k\,U_L(x;\boldsymbol{\theta})\ket{0}^{\otimes n}.
 \]
 
-\paragraph{Objective (explicit).}
+\paragraph{Objective.}
 \[
 \mathcal{L}_{\text{QNN}}
 \;=\;
@@ -502,12 +516,17 @@ Estimate each $\langle Z_k\rangle$ from $S$ shots:
 \qquad
 n^{(k)}_0 + n^{(k)}_1 = S.
 \]
-Gradients w.r.t.\ circuit parameters use parameter-shift for each gate parameter $\theta$:
+For each circuit parameter $\theta$, the parameter-shift rule gives $\partial\langle Z_k\rangle/\partial\theta=\tfrac12\big[\langle Z_k\rangle(\theta+\tfrac{\pi}{2})-\langle Z_k\rangle(\theta-\tfrac{\pi}{2})\big]$, and the chain rule gives
 \[
 \frac{\partial \mathcal{L}_{\text{QNN}}}{\partial \theta}
 =
-\frac{1}{2}\Big[\mathcal{L}_{\text{QNN}}(\theta{+}\tfrac{\pi}{2})-\mathcal{L}_{\text{QNN}}(\theta{-}\tfrac{\pi}{2})\Big].
+\frac{2}{N}\sum_{i=1}^{N}\big(f_{\mathrm{QNN}}(x_i)-y_i\big)\sum_{k=1}^{n}\alpha_k\,\frac{\partial \langle Z_k\rangle(x_i)}{\partial \theta},
+\qquad
+\frac{\partial \mathcal{L}_{\text{QNN}}}{\partial \alpha_k}
+=
+\frac{2}{N}\sum_{i=1}^{N}\big(f_{\mathrm{QNN}}(x_i)-y_i\big)\langle Z_k\rangle(x_i),
 \]
+with $\langle Z_0\rangle\equiv1$ for the bias $\alpha_0$.
 
 % -------------------------------
 \subsection*{Experiments: depth vs.\ performance}
@@ -515,29 +534,26 @@ Gradients w.r.t.\ circuit parameters use parameter-shift for each gate parameter
 \paragraph{Protocol (common to MLP and QNN).}
 For $L\in\{1,2,4,8\}$:
 \begin{itemize}
-\item keep optimizer, learning rate, epochs, batch size (and for QNN, shots $S$) fixed across depths;
-\item initialize from the same distribution across $L$;
-\item record final train/test MSE, loss curves, gradient-norm curves (QNN), and time/epoch.
+\item keep the optimizer, learning rate, epochs, batch size (and, for the QNN, the number of shots $S$) fixed across depths;
+\item initialize from the same distribution for every $L$;
+\item record final train/test MSE, loss curves, gradient-norm curves, and time per epoch.
 \end{itemize}
 
 \paragraph{Mini-experiment A (depth helps).}
-Use target (T1) with moderate $n$.  
-Show that increasing $L$ from $1\to 3$ improves approximation quality in both MLP and QNN.  
-Explain why additional QNN layers enlarge the accessible trigonometric mixture over encoded angles, enabling better fit.
+Use target (T1) with moderate $n$.
+Check whether increasing $L$ from $1$ to $2$ improves the approximation for both the MLP and the QNN.
+Explain why additional re-uploading layers enlarge the set of trigonometric functions of the encoded angles that the QNN can represent.
 
-\paragraph{Mini-experiment B (depth hurts).}
-Use target (T2), same $n$.  
-Train for $L=4$ and $L=8$; report that deeper QNNs converge more slowly and/or plateau at worse MSE, accompanied by smaller gradient norms (barren-plateau signature).  
-Contrast with the MLP, which may continue to improve modestly with depth.
-
-% -------------------------------
+\paragraph{Mini-experiment B (does depth hurt?).}
+Use target (T2) with the same $n$.
+Train with $L=4$ and $L=8$. Do the deeper QNNs converge more slowly or plateau at a worse MSE? Are their gradient norms smaller (a barren-plateau signature)?
+Contrast with the MLP, which may keep improving modestly with depth.
 
 % -------------------------------
-\subsection*{Deliverables do for $n \in \{2,3,4,6,8\}$}
+\subsection*{Deliverables (for $n \in \{2,3,4,6,8\}$)}
 \begin{enumerate}[label=(\alph*)]
-\item Plots for both classical and quantum perspectives: fits, loss vs.\ epochs, gradient norms vs \ epochs  for $L\in\{1,2,4,8\}$. Comment on similarities and differences between plots.
-\item Tables: train/test MSE, time/epoch for each $L$ for both models; record $S$.
-\item Reflections: explain depth–performance relation,  and how the properties of the gradient norm differ between classical and quantum perspective both in terms of $n$ and $L$ .
+\item Plots for both the classical and quantum models: fits, loss vs.\ epochs, and gradient norm vs.\ epochs for $L\in\{1,2,4,8\}$. Comment on the similarities and differences between the plots.
+\item Tables: train/test MSE and time per epoch for each $L$, for both models; record $S$.
+\item Reflections: explain the relation between depth and performance, and how the gradient norm behaves differently for the classical and quantum models as $n$ and $L$ grow.
 \end{enumerate}
 \end{document}
-
