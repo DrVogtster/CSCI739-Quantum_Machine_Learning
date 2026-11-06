@@ -222,7 +222,7 @@ This project replaces Problems 1 and 2 for full credit (or adds to them, if you 
 \end{summary}
 
 \paragraph{Data.}
-Load MNIST, for example with \texttt{sklearn.datasets.fetch\_openml('mnist\_784')} or \texttt{torchvision.datasets.MNIST}. Start with a binary task:
+Load MNIST, for example with \path{sklearn.datasets.fetch_openml('mnist_784')} or \path{torchvision.datasets.MNIST}. Start with a binary task:
 \begin{itemize}
 \item an easy pair, \textbf{0 vs.\ 1};
 \item a harder pair of your choice, e.g.\ \textbf{3 vs.\ 5} or \textbf{4 vs.\ 9}.
@@ -231,6 +231,22 @@ Quantum simulation is slow, so subsample: for example $1000$ training and $500$ 
 
 \paragraph{PCA.}
 Fit PCA on the \emph{training set only} (fitting on the test set leaks information) and keep the top $k$ components, $k\in\{2,4,8,16\}$. Then rescale each component to an angle range such as $[0,\pi]$ using the training-set minimum and maximum.
+
+\paragraph{Why PCA, and what it costs.}
+PCA projects each centered image onto the $k$ orthogonal directions of largest variance in the training set (the top eigenvectors of the sample covariance matrix). Keep these trade-offs in mind as you work; part (f) asks you to weigh them with your own results.
+
+\smallskip
+\noindent\emph{PCA in classical machine learning.}
+\begin{itemize}
+\item \textbf{Pros:} it reduces dimension sharply (on MNIST, a few dozen components keep most of the pixel variance, which you will measure in (a)); it removes correlated and nearly constant pixels (the image borders) and some noise; it makes models smaller, faster to train, and less prone to overfitting when data are scarce; it gives 2D and 3D pictures of the data; it is cheap, deterministic, and has a closed form.
+\item \textbf{Cons:} it is \emph{linear}, so curved structure in the data (digit shapes under stroke thickness, slant, and shift) is only approximated; it is \emph{unsupervised}, so the directions of largest variance need not be the ones that separate the classes, and a small-variance direction that tells 4 from 9 can be thrown away; components are global mixtures of pixels and hard to interpret; it is sensitive to how features are scaled; and whatever it discards is gone for every model trained afterwards. Modern classical models (CNNs) usually work on the raw pixels and learn their own features instead.
+\end{itemize}
+
+\noindent\emph{PCA first, then a VQC.}
+\begin{itemize}
+\item \textbf{Pros:} it is often the only way to fit the data onto the qubits at all ($k$ qubits with angle encoding instead of $784$); it keeps the encoding circuit shallow, which matters on noisy NISQ hardware (compare amplitude encoding in (b)); it keeps the number of trainable parameters, the shot budget, and the simulation cost small; and it gives a clean, controlled experiment in which $k$ sets the problem size for every model.
+\item \textbf{Cons:} the classical preprocessing does much of the work, and the quantum model can only use what PCA kept; if a good classifier exists on $k$ features, a small classical model on the same $k$ features usually finds it too, so the fair baseline is a classical model on the \emph{same} PCA features, not on raw pixels; any claim of a quantum advantage then concerns only the low-dimensional problem; the components carry very unequal variance, so the qubits encoding the last components carry little information; the rescaling to angles is a modeling choice (angle encoding is periodic, so values far outside $[0,\pi]$ wrap around); and PCA itself is a classical step that has to be computed on the full data first. (Quantum PCA algorithms exist, but they need quantum access to the data and fault-tolerant hardware.)
+\end{itemize}
 
 \begin{enumerate}[label=(\alph*)]
 \item \textbf{Data, PCA, and classical baselines (15 pts).}
@@ -262,20 +278,20 @@ Implement a VQC classifier on the PCA-$k$ features for $k\in\{2,4,8\}$ (and $16$
 \end{itemize}
 
 \item \textbf{A full-input quantum model (15 pts).}
-Build a quantum model that sees the \emph{entire} image: amplitude-encode the padded $1024$-dimensional image on $10$ qubits and train a VQC on top of it. You may use your simulator's direct state initialization; report how many gates a real circuit for this state preparation would need (e.g.\ by transpiling the \texttt{initialize}/\texttt{StatePreparation} circuit in Qiskit for a few images). Compare accuracy and cost with the amplitude-encoded PCA-$k$ models ($k=16$ fits on $4$ qubits). Does the extra information in the full image help the quantum model, and what does it cost?
+Build a quantum model that sees the \emph{entire} image: amplitude-encode the padded $1024$-dimensional image on $10$ qubits and train a VQC on top of it. You may use your simulator's direct state initialization; report how many gates a real circuit for this state preparation would need (e.g.\ by transpiling the \path{initialize}/\path{StatePreparation} circuit in Qiskit for a few images). Compare accuracy and cost with the amplitude-encoded PCA-$k$ models ($k=16$ fits on $4$ qubits). Does the extra information in the full image help the quantum model, and what does it cost?
 
 \item \textbf{Comparison (15 pts).}
 On one figure per task, plot test accuracy vs.\ input dimension $k$ for: logistic regression, MLP, and your QNN(s), with the full-input classical and quantum results as reference lines. Make a second plot of test accuracy vs.\ number of trainable parameters. Also report training wall-clock time. Where do the quantum models match the classical ones, and where do they fall behind?
 
 \item \textbf{Report and reflection (10 pts).}
-Write a short report (about 4–6 pages) with your plots, tables, and the encoding table from (b). Answer: How much of the digit information survives PCA at small $k$, and is that why small QNNs can work at all? Which encodings would you choose for a real quantum device today, and why? What would have to change, in hardware or in algorithms, for a quantum model to use all $784$ pixels without PCA? Include your code.
+Write a short report (about 4–6 pages) with your plots, tables, and the encoding table from (b). Answer: How much of the digit information survives PCA at small $k$, and is that why small QNNs can work at all? Using your own results, weigh the pros and cons of PCA listed above: for the classical models, did PCA help or hurt compared with the full $784$-pixel input? For the quantum models, how much of the accuracy comes from PCA and how much from the VQC (compare with the classical models on the same $k$ features)? Did the harder digit pair suffer more from PCA than the easy one, and why? Which encodings would you choose for a real quantum device today, and why? What would have to change, in hardware or in algorithms, for a quantum model to use all $784$ pixels without PCA? Include your code.
 
 \item \textbf{(Optional, for fun) Going further.}
 Try the hardest version you can: a 10-class classifier (e.g.\ one output qubit per class, or one-vs-rest), a run of your smallest trained model on IBM NISQ hardware with $S\in\{10,100,1000\}$ shots, or a hybrid model with a classical layer before the quantum circuit. Compare with your simulator results.
 \end{enumerate}
 
 \paragraph{Suggested tools.}
-Qiskit or PennyLane for circuits, \texttt{scikit-learn} for PCA and the classical baselines, and PyTorch or JAX if you want autodifferentiation. Your own NumPy statevector simulator is also welcome for $\le 12$ qubits.
+Qiskit or PennyLane for circuits, \path{scikit-learn} for PCA and the classical baselines, and PyTorch or JAX if you want autodifferentiation. Your own NumPy statevector simulator is also welcome for $\le 12$ qubits.
 
 % ============================================
 \newpage
