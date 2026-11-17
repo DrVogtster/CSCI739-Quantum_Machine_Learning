@@ -1,171 +1,196 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage{physics}
-\usepackage{bm}
-\usepackage{hyperref}
+\usepackage{amsmath, amssymb}
 \usepackage{graphicx}
 \usepackage{enumitem}
-\usepackage{siunitx}
-\usepackage{mathtools}
-\usepackage{braket}
-\usepackage{quantikz}
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta,calc}
-\usepackage{MnSymbol,wasysym} % contains \smiley{}
+\usepackage{wasysym} % provides \smiley{}
+\usepackage{hyperref}
 
 \newenvironment{summary}{\par\noindent\textbf{Summary.} }{\par}
 
-\title{CSCI-739 Quantum Machine Learning \\[4pt] \large Homework 5}
+% One block per paper: what to hand in.
+\newcommand{\yourtask}[1]{%
+  \vspace{0.5em}
+  \noindent\textbf{Your task:} #1
+  \begin{itemize}
+    \item A 1--2 paragraph summary in your own words.
+    \item 3--5 bullet points with your takeaways, questions, or criticisms.
+  \end{itemize}}
+
+\title{CSCI-739 Quantum Machine Learning \\[4pt] \large Homework 5 (Bonus)}
+\author{}
 \date{}
 
 \begin{document}
 \maketitle
 
-\begin{center}
+This bonus homework is unlike the earlier ones. Instead of implementing algorithms or running
+simulations, you will explore a curated set of research papers spanning several themes in quantum
+computing that I personally enjoy thinking about and working on: quantum approaches to combinatorial
+optimization, quantum algorithms for applied mathematics and numerical PDEs, high-fidelity qubit
+control for more robust computation, and a new algorithmic framework called Decoded Quantum
+Interferometry (DQI).
 
-This bonus homework is unlike the earlier ones. Instead of implementing algorithms or running simulations, 
-you will explore a curated set of research papers spanning several themes in quantum computing that I 
-personally enjoy thinking about and working on: quantum approaches to combinatorial optimization, 
-quantum algorithms for applied mathematics and numerical PDEs, high-fidelity qubit control for more 
-robust computation, and a new algorithmic framework called Decoded Quantum Interferometry (DQI). 
+Each paper represents a different facet of how quantum computation may ultimately reshape
+optimization, scientific computing, control theory, and algorithm design. Your job is simply to read,
+reflect, and summarize. This homework is about intellectual curiosity, not coding. \smiley{}
 
-Each paper represents a different facet of how quantum computation may ultimately reshape optimization, 
-scientific computing, control theory, and algorithm design. Your job is simply to read, reflect, and 
-summarize—this homework is about intellectual curiosity, not coding. \smiley{}
+If you are interested in pursuing a quantum computing capstone, or an unpaid research opportunity with
+me at RIT, please feel free to reach out. This assignment is meant to give you a preview of the
+directions I actively think about and where future student research projects can meaningfully
+contribute. \smiley{}
 
-If you are interested in pursuing a quantum computing–based capstone, or an unpaid research opportunity 
-with me at RIT, please feel free to reach out. This assignment is meant to give you a preview of the 
-directions I actively think about and where future student research projects can meaningfully contribute. \smiley{}
-
-\end{center}
-Also here is a meme:
+\medskip
+\noindent Also, here is a meme:
 \begin{figure}[h!]
 \centering
-\vspace{1em}
 \includegraphics[width=0.75\textwidth]{quantumvogt3.png}
-\vspace{0.5em}
 \end{figure}
 
 \newpage
-\vspace{1em}
 
-\noindent \textbf{Instructions.}  
-For each paper listed below:
+\noindent\textbf{Instructions.}
+For each of the four papers below:
 \begin{itemize}
-    \item Read the assigned sections.
-    \item Write a clear summary (1--2 paragraphs).
-    \item Give your general takeaways and thoughts (3--5 bullet points).
+    \item Read the sections listed under \emph{What to read}.
+    \item Write a clear summary (1--2 paragraphs) in your own words.
+    \item Give your general takeaways and thoughts (3--5 bullet points). Questions, confusions, and
+          criticisms all count.
 \end{itemize}
 
-This homework is optional, but strongly recommended for students interested in research, graduate school, or future work in quantum computing. Have fun! \smiley{}
+\noindent You do not need to follow every derivation. Aim to understand what problem each paper
+solves, the main idea of its method, and what evidence it gives that the method works. Submit
+everything as a single PDF.
+
+\medskip
+\noindent This homework is optional, but strongly recommended for students interested in research,
+graduate school, or future work in quantum computing. Have fun! \smiley{}
 
 \newpage
 
 % ----------------------------------------------------------
-\section*{Paper 1 — Quantum Approximate Optimization Algorithm (QAOA) \\
-\small{(QAOA.pdf)}}
+\section*{Paper 1: A Quantum Approximate Optimization Algorithm\\
+\small{QAOA. E.~Farhi and J.~Goldstone, arXiv:1411.4028 (2014) \quad (\texttt{QAOA.pdf})}}
 
 \begin{summary}
-QAOA is a variational quantum algorithm designed to solve combinatorial optimization problems by alternating between cost and mixing operators.
+QAOA is a variational quantum algorithm for combinatorial optimization. It alternates between a
+cost operator built from the objective function and a mixing operator, for $p$ rounds, with $2p$
+angles chosen to maximize the expected value of the objective. The paper studies MaxCut and shows
+that the approximation ratio cannot get worse as $p$ grows.
 \end{summary}
 
 \paragraph{Connection to my research.}
-I like to think about how quantum computers can impact \textbf{optimization theory}, which is deeply connected to \textbf{machine learning}. Optimization is everywhere in ML, and QAOA is a core quantum approach to these problems. \smiley{}
+I like to think about how quantum computers can impact \textbf{optimization theory}, which is
+deeply connected to \textbf{machine learning}. Optimization is everywhere in ML, and QAOA is a core
+quantum approach to these problems. \smiley{}
 
-\vspace{0.5em}
-\noindent\textbf{Your task:}  
-Read the paper and write:
-\begin{itemize}
-    \item A 1--2 paragraph summary.
-    \item 3--5 bullet-point takeaways or thoughts.
-\end{itemize}
+\paragraph{What to read.}
+The whole paper is 16 pages. Focus on the Introduction and the description of the
+algorithm (pp.~1--6, before Section III), Section V (the ring of
+disagrees), and Section VI (MaxCut on 3-regular graphs). Skim the rest.
+
+\yourtask{Read the paper and write:}
 
 \newpage
 
 % ----------------------------------------------------------
-\section*{Paper 2 — Quantum PDE / Quantum Algorithms for Applied Mathematics \\
-\small{(QuantumPDE.pdf)}}
+\section*{Paper 2: Quantum Algorithms for Nonlinear PDEs\\
+\small{R.~Vogt \emph{et al.}, Phys.\ Rev.\ A \textbf{112}, 052431 (2025) \quad
+(\texttt{QuantumPDE.pdf})}}
 
 \begin{summary}
-This paper explores how quantum algorithms might accelerate numerical PDE solvers.
+Conservation laws lead to nonlinear PDEs whose solutions can develop shocks. This paper shows how
+finite-volume (FV) and weighted essentially nonoscillatory (WENO) shock-capturing methods can be
+built into a quantum algorithm for nonlinear PDEs (QPDE), and tests the modified algorithm in
+simulation on a smooth problem and on two shock-tube (Riemann) problems with known exact solutions.
 \end{summary}
 
 \paragraph{Connection to my research.}
-I am interested in how quantum computing may influence \textbf{applied mathematics} in general—PDEs, optimization, control, uncertainty quantification, and scientific computing. This paper gives a window into the future of \textbf{quantum scientific computing}. \smiley{}
+I am interested in how quantum computing may influence \textbf{applied mathematics} in general:
+PDEs, optimization, control, uncertainty quantification, and scientific computing. This paper gives
+a window into the future of \textbf{quantum scientific computing}. \smiley{}
 
-\vspace{0.5em}
-\noindent\textbf{Your task:}  
-Read the paper and write:
-\begin{itemize}
-    \item A 1--2 paragraph summary.
-    \item 3--5 bullet-point takeaways or thoughts.
-\end{itemize}
+\paragraph{What to read.}
+The abstract, Section I (Introduction), Section II.A (the QPDE algorithm summary), the results of
+one verification problem of your choice (Sections III--V), and Section VI (Discussion). You can skip
+the details of the WENO reconstruction in Section II.C.
+
+\yourtask{Read the assigned sections and write:}
 
 \newpage
 
 % ----------------------------------------------------------
-\section*{Paper 3 — High-Fidelity Qubit Control and Pulse Engineering \\
-\small{(QubitControl.pdf)}}
+\section*{Paper 3: Binary Optimal Control of Single-Flux-Quantum Pulse Sequences\\
+\small{R.~H.~Vogt and N.~A.~Petersson, arXiv:2106.10329 (2022) \quad (\texttt{QubitControl.pdf})}}
 
 \begin{summary}
-This paper analyzes pulse engineering and optimal control methods for producing high-fidelity quantum gates resilient to noise and hardware imperfections.
+Single flux quantum (SFQ) control drives a superconducting qubit with a train of identical pulses,
+each of which is either on or off. This paper treats the choice of pulse sequence as a binary optimal
+control problem constrained by Schr\"odinger's equation, and solves it with a relaxed-gradient
+trust-region method. The optimized sequences reach gate fidelities above 99.9\% for the $H$ and $X$
+gates while suppressing leakage to higher energy levels.
 \end{summary}
 
 \paragraph{Connection to my research.}
-I am very interested in achieving more \textbf{stable quantum computation} through improved qubit control.  
-There is also a \textbf{nascent effort} to explore whether ideas from this paper (originally for superconducting qubits) can be adapted to RIT’s \textbf{photonic quantum computing testbed} for running QAOA circuits. \smiley{}
+I am very interested in achieving more \textbf{stable quantum computation} through improved qubit
+control. There is also a \textbf{nascent effort} to explore whether ideas from this paper
+(originally for superconducting qubits) can be adapted to RIT's \textbf{photonic quantum computing
+testbed} for running QAOA circuits. \smiley{}
 
-\vspace{0.5em}
-\noindent\textbf{Your task:}  
-Read the paper and write:
-\begin{itemize}
-    \item A 1--2 paragraph summary.
-    \item 3--5 bullet-point takeaways or thoughts.
-\end{itemize}
+\paragraph{What to read.}
+The abstract, Section 1 (Introduction), Section 2 (the SFQ optimal control problem), the main idea
+of Section 4 (the trust-region method), Section 5.1 (the $H$ gate experiment), and Section 6
+(Conclusions). You can skip the gradient derivation in Section 3.
+
+\yourtask{Read the assigned sections and write:}
 
 \newpage
 
 % ----------------------------------------------------------
-\section*{Paper 4 — Decoded Quantum Interferometry (DQI) \\
-\small{(DQI.pdf)}}
+\section*{Paper 4: Optimization by Decoded Quantum Interferometry\\
+\small{DQI. S.~P.~Jordan \emph{et al.}, arXiv:2408.08292 (2024) \quad (\texttt{DQI.pdf})}}
 
 \begin{summary}
-DQI is a quantum algorithm that frames combinatorial optimization problems as decoding tasks, using the QFT, structured quantum states (such as Dicke states), and constructive interference to amplify good solutions.
+DQI is a quantum algorithm that uses the quantum Fourier transform to turn combinatorial optimization
+problems into decoding problems. It prepares a superposition of Dicke states, encodes the problem
+into phases, and then uses a classical decoder to uncompute an auxiliary register, so that
+interference amplifies good solutions.
 \end{summary}
+
 \paragraph{Connection to my research.}
-I am especially interested in exploring how the DQI algorithm can be applied to major, real-world problems in combinatorial optimization. Even discovering a way to effectively use DQI on just one high-impact combinatorial optimization task—for instance, a specific form of the traveling salesman problem—would already represent a substantial breakthrough. \smiley{}
+I am especially interested in exploring how the DQI algorithm can be applied to major, real-world
+problems in combinatorial optimization. Even discovering a way to effectively use DQI on just one
+high-impact combinatorial optimization task, for instance a specific form of the traveling salesman
+problem, would already represent a substantial breakthrough. \smiley{}
 
-\paragraph{Reading instructions (Important).}
-The DQI paper is \textbf{80+ pages}.  
-You do \textbf{NOT} need to read the entire paper (unless you really want to \smiley{}).
-
-Please read only the following:
+\paragraph{What to read (important).}
+The DQI paper is \textbf{80 pages} long. You do \textbf{not} need to read all of it (unless you
+really want to \smiley{}). Everything below is in the first few pages (roughly pp.~1--5):
 \begin{itemize}
-    \item Abstract  
-    \item Introduction  
-    \item The illustrative max-XORSAT example  
-    \item Figure 1 and the explanation of the 5-step DQI algorithm  
-    \item The high-level discussion of the decoder  
-    \item The semicircle-law intuition (conceptual level only)
+    \item The abstract.
+    \item The opening of Section 1 (Introduction).
+    \item The illustrative max-XORSAT example.
+    \item Figure 1 and the explanation of the five steps of the DQI algorithm.
+    \item The high-level discussion of why the decoding step (uncomputing $|y\rangle$) reduces to
+          syndrome decoding, and when it can be done efficiently.
+    \item The ``semicircle law'' intuition (at a conceptual level only).
 \end{itemize}
-
 This subset is enough to understand the core idea. \smiley{}
 
-\vspace{0.5em}
-\noindent\textbf{Your task:}  
-Read the assigned sections and write:
-\begin{itemize}
-    \item A 1--2 paragraph summary of the DQI algorithm.
-    \item 3--5 bullet-point takeaways or thoughts.
-\end{itemize}
+\yourtask{Read the assigned sections and write:}
 
 \newpage
 
 % ----------------------------------------------------------
-\section*{Final Reflection}
+\section*{Final Reflection (optional)}
 
-If you are ever interested in a capstone or research experience in quantum computing, feel free to reach out at rhvvcs@rit.edu. While these are some examples of projects I am currently pursuing, that doesn't mean I wouldn't be happy to oversee different quantum computing-related projects. If you have an idea and or an interest, I'm happy to mentor you regardless \smiley{}.
+In a few sentences, tell me which of these four directions you found most interesting and why, and
+what kind of project you could imagine doing in that area.
 
+\medskip
+\noindent If you are ever interested in a capstone or research experience in quantum computing,
+feel free to reach out at \href{mailto:rhvvcs@rit.edu}{rhvvcs@rit.edu}. These are some of the
+projects I am currently pursuing, but I am happy to oversee other quantum computing projects too. If
+you have an idea and/or an interest, I am happy to mentor you regardless. \smiley{}
 
 \end{document}
